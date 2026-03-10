@@ -3,6 +3,7 @@ package com.produto.api.controller;
 import com.produto.api.dto.AddProductDTO;
 import com.produto.api.dto.ResponseProductDTO;
 import com.produto.api.dto.UpdateProductDTO;
+import com.produto.api.dto.WithdrawOrPutProductDTO;
 import com.produto.api.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,5 +45,17 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody @Valid UpdateProductDTO product){
         service.updateProduct(id, product);
         return ResponseEntity.ok("Produto Atualizado com sucesso");
+    }
+
+    @PatchMapping("/{id}/withdraw")
+    public ResponseEntity<?> buyProduct(@PathVariable Long id, @RequestBody @Valid WithdrawOrPutProductDTO product){
+        service.withdrawProduct(id,product);
+        return ResponseEntity.ok("Produto Retirado do Estoque com Sucesso");
+    }
+
+    @PatchMapping("/{id}/put")
+    public ResponseEntity<?> putProduct(@PathVariable Long id, @RequestBody @Valid UpdateProductDTO product){
+        service.putProduct(id,product);
+        return ResponseEntity.ok("Produto Colocado no Estoque com Sucesso");
     }
 }

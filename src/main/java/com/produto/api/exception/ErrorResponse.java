@@ -1,7 +1,6 @@
 package com.produto.api.exception;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -17,6 +16,10 @@ public class ErrorResponse {
 
     private List<Field> fields; // Para erros de validação
 
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Field {
         private String name;
         private String userMessage;
