@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 public record RegisterUserRequestDTO(
         @NotEmpty(message = "Nome é obrigatório") String name,
-        @NotEmpty(message = "Email é obrigatório") String email,
+        @NotEmpty(message = "Email é obrigatório") String login,
         @NotEmpty(message = "Senha é obrigatório") String password,
         UserRole role
 ) {
