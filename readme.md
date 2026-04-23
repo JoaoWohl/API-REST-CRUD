@@ -62,7 +62,7 @@ Para rodar este projeto, você precisará de ferramentas diferentes dependendo d
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/JoaoWohl/API-Produtos.git
+git clone https://github.com/JoaoWohl/API-REST-CRUD.git
 ```
 
 ### 2. Configure o ambiente
