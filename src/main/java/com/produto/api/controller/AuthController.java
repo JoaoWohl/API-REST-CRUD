@@ -1,11 +1,11 @@
 package com.produto.api.controller;
 
+import com.produto.api.config.security.TokenConfig;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.dto.response.user.RegisterUserResponseDTO;
 import com.produto.api.entity.user.User;
-import com.produto.api.entity.user.UserRole;
 import com.produto.api.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +29,8 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private TokenConfig tokenConfig;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
@@ -36,7 +38,10 @@ public class AuthController {
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(),request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);
 
-        return null;
+        User user = (User) authentication.getPrincipal();
+        String token = tokenConfig.generateToken(user);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new LoginResponseDTO(token));
     }
 
     @PostMapping("/register")
