@@ -1,9 +1,9 @@
 package com.produto.api.service;
 
-import com.produto.api.dto.AddProductDTO;
-import com.produto.api.dto.ResponseProductDTO;
-import com.produto.api.dto.UpdateProductDTO;
-import com.produto.api.dto.WithdrawOrPutProductDTO;
+import com.produto.api.dto.request.product.AddProductDTO;
+import com.produto.api.dto.response.product.ResponseProductDTO;
+import com.produto.api.dto.request.product.UpdateProductDTO;
+import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.exception.NotEnoghProductException;
 import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;

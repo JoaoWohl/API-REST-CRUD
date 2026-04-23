@@ -1,20 +1,19 @@
 package com.produto.api.mapper;
 
-import com.produto.api.dto.AddProductDTO;
-import com.produto.api.dto.ResponseProductDTO;
-import com.produto.api.dto.UpdateProductDTO;
+import com.produto.api.dto.request.product.AddProductDTO;
+import com.produto.api.dto.response.product.ResponseProductDTO;
+import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.model.Product;
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
+    @Mapping(target = "id", ignore = true)
     Product toEntityAdd(AddProductDTO product);
 
+    @Mapping(target = "id", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    Product toEntityUpdate(UpdateProductDTO product, @MappingTarget Product entity);
+    void toEntityUpdate(UpdateProductDTO product, @MappingTarget Product entity);
 
     ResponseProductDTO toDTO(Product product);
 }
