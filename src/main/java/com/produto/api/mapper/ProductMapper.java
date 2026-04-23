@@ -3,7 +3,7 @@ package com.produto.api.mapper;
 import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
-import com.produto.api.model.Product;
+import com.produto.api.entity.Product;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")

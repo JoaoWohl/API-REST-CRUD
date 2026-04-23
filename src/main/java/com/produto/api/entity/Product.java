@@ -1,4 +1,4 @@
-package com.produto.api.model;
+package com.produto.api.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

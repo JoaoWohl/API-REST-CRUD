@@ -7,7 +7,7 @@ import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.exception.NotEnoghProductException;
 import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
-import com.produto.api.model.Product;
+import com.produto.api.entity.Product;
 import com.produto.api.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
