@@ -51,18 +51,8 @@ public class AuthController {
 
     @PostMapping("/admin/register")
     public ResponseEntity<RegisterUserResponseDTO> adminRegister(@RequestBody @Valid RegisterUserRequestDTO request) {
-        if (repository.existsByLogin(request.login())){
-            throw new RuntimeException("Login Exists");
-        }
-        User newUser = new User();
-        newUser.setName(request.name());
-        newUser.setLogin(request.login());
-        newUser.setPassword(passwordEncoder.encode(request.password()));
-        newUser.setRole(request.role());
-
-        repository.save(newUser);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterUserResponseDTO(newUser.getName(), newUser.getLogin()));
+        RegisterUserResponseDTO response = service.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
 

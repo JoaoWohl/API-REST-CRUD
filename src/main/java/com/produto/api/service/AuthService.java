@@ -50,4 +50,19 @@ public class AuthService {
 
         return new RegisterUserResponseDTO(newUser.getName(), newUser.getLogin());
     }
+
+    public RegisterUserResponseDTO registerAdmin(RegisterUserRequestDTO request){
+        if (repository.existsByLogin(request.login())){
+            throw new RuntimeException("Login Exists");
+        }
+        User newUser = new User();
+        newUser.setName(request.name());
+        newUser.setLogin(request.login());
+        newUser.setPassword(encoder.encode(request.password()));
+        newUser.setRole(request.role());
+
+        repository.save(newUser);
+
+        return new RegisterUserResponseDTO(newUser.getName(), newUser.getLogin());
+    }
 }
