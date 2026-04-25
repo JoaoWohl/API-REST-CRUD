@@ -1,5 +1,7 @@
 package com.produto.api.exception;
 
+import com.produto.api.exception.auth.UserExistException;
+import com.produto.api.exception.auth.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +67,33 @@ public class GlobalExceptionHandler {
                 .fields(fields)
                 .build();
         return ResponseEntity.status(status).body(erro);
+    }
+
+    @ExceptionHandler(UserExistException.class)
+    private ResponseEntity<ErrorResponse> userExistHandler(UserExistException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = ErrorResponse.builder()
+                .status(status.value())
+                .timestamp(OffsetDateTime.now())
+                .type(request.getRequestURI())
+                .title("Usuário Cadastrado")
+                .detail(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    private ResponseEntity<ErrorResponse> userNotFoundHandler(UserNotFoundException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        ErrorResponse error = ErrorResponse.builder()
+                .status(status.value())
+                .timestamp(OffsetDateTime.now())
+                .type(request.getRequestURI())
+                .title("Usuário Não Encontrado")
+                .detail(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(status).body(error);
     }
 }

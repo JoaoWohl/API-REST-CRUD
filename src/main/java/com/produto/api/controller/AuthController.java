@@ -1,0 +1,42 @@
+package com.produto.api.controller;
+
+import com.produto.api.dto.request.user.LoginRequestDTO;
+import com.produto.api.dto.request.user.RegisterUserRequestDTO;
+import com.produto.api.dto.response.user.LoginResponseDTO;
+import com.produto.api.dto.response.user.RegisterUserResponseDTO;
+import com.produto.api.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+    @Autowired
+    private AuthService service;
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
+        LoginResponseDTO response = service.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<RegisterUserResponseDTO> register(@RequestBody @Valid RegisterUserRequestDTO request) {
+        RegisterUserResponseDTO response = service.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/admin/register")
+    public ResponseEntity<RegisterUserResponseDTO> adminRegister(@RequestBody @Valid RegisterUserRequestDTO request) {
+        RegisterUserResponseDTO response = service.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+}
