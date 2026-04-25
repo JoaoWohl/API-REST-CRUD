@@ -6,10 +6,12 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.produto.api.entity.user.User;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Optional;
 
+@Service
 public class TokenConfig {
     @Value("${JWT_SECRET}")
     private String secret;
