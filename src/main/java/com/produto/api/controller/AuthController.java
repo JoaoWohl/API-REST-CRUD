@@ -6,6 +6,7 @@ import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.dto.response.user.RegisterUserResponseDTO;
 import com.produto.api.entity.user.User;
+import com.produto.api.entity.user.UserRole;
 import com.produto.api.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,23 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponseDTO> register(@RequestBody @Valid RegisterUserRequestDTO request) {
         if (repository.existsByLogin(request.login())){
-            throw new RuntimeException("Teste");
+            throw new RuntimeException("Login Exists");
+        }
+        User newUser = new User();
+        newUser.setName(request.name());
+        newUser.setLogin(request.login());
+        newUser.setPassword(passwordEncoder.encode(request.password()));
+        newUser.setRole(UserRole.USER);
+
+        repository.save(newUser);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterUserResponseDTO(newUser.getName(), newUser.getLogin()));
+    }
+
+    @PostMapping("/admin/register")
+    public ResponseEntity<RegisterUserResponseDTO> adminRegister(@RequestBody @Valid RegisterUserRequestDTO request) {
+        if (repository.existsByLogin(request.login())){
+            throw new RuntimeException("Login Exists");
         }
         User newUser = new User();
         newUser.setName(request.name());
