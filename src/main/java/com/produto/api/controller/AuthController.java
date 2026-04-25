@@ -8,6 +8,7 @@ import com.produto.api.dto.response.user.RegisterUserResponseDTO;
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
 import com.produto.api.repository.UserRepository;
+import com.produto.api.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,16 +34,13 @@ public class AuthController {
     @Autowired
     private TokenConfig tokenConfig;
 
+    @Autowired
+    private AuthService service;
+
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
-
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(),request.password());
-        Authentication authentication = authenticationManager.authenticate(userAndPass);
-
-        User user = (User) authentication.getPrincipal();
-        String token = tokenConfig.generateToken(user);
-
-        return ResponseEntity.status(HttpStatus.OK).body(new LoginResponseDTO(token));
+        LoginResponseDTO response = service.login(request);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/register")
