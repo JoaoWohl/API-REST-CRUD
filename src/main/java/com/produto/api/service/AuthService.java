@@ -7,6 +7,8 @@ import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.dto.response.user.RegisterUserResponseDTO;
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
+import com.produto.api.exception.auth.UserExistException;
+import com.produto.api.exception.auth.UserNotFoundException;
 import com.produto.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +29,10 @@ public class AuthService {
     private TokenConfig tokenConfig;
 
     public LoginResponseDTO login(LoginRequestDTO request){
+        if (!repository.existsByLogin(request.login())){
+            throw new UserNotFoundException();
+        }
+
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(),request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);
 
@@ -38,8 +44,9 @@ public class AuthService {
 
     public RegisterUserResponseDTO register(RegisterUserRequestDTO request){
         if (repository.existsByLogin(request.login())){
-            throw new RuntimeException("Login Exists");
+            throw new UserExistException();
         }
+
         User newUser = new User();
         newUser.setName(request.name());
         newUser.setLogin(request.login());
@@ -53,8 +60,9 @@ public class AuthService {
 
     public RegisterUserResponseDTO registerAdmin(RegisterUserRequestDTO request){
         if (repository.existsByLogin(request.login())){
-            throw new RuntimeException("Login Exists");
+            throw new UserExistException();
         }
+
         User newUser = new User();
         newUser.setName(request.name());
         newUser.setLogin(request.login());
