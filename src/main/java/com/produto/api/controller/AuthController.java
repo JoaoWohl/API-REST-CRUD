@@ -1,22 +1,14 @@
 package com.produto.api.controller;
 
-import com.produto.api.config.security.TokenConfig;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.dto.response.user.RegisterUserResponseDTO;
-import com.produto.api.entity.user.User;
-import com.produto.api.entity.user.UserRole;
-import com.produto.api.repository.UserRepository;
 import com.produto.api.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,15 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    private UserRepository repository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private TokenConfig tokenConfig;
-
     @Autowired
     private AuthService service;
 
