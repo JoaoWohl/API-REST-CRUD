@@ -50,6 +50,7 @@ public class AuthController {
             throw new RuntimeException("Teste");
         }
         User newUser = new User();
+        newUser.setName(request.name());
         newUser.setLogin(request.login());
         newUser.setPassword(passwordEncoder.encode(request.password()));
         newUser.setRole(request.role());
