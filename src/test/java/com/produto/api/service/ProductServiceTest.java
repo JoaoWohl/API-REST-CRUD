@@ -20,7 +20,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -352,6 +351,62 @@ class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
+    }
+
+
+
+    @Test
+    void putProduct_ShouldReturnSuccess_WhenAllOk(){
+        Product product = new Product(
+                1L,
+                "ProductTest",
+                new BigDecimal("1.99"),
+                10
+        );
+        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(1);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        productService.putProduct(1L,putProduct);
+
+        verify(productRepository).save(argThat(p ->
+                p.getId() == 1L
+                && p.getName().equals("ProductTest")
+                && p.getPrice().equals(new BigDecimal("1.99"))
+                && p.getQuantity() == 11
+        ));
+    }
+
+    @Test
+    void putProduct_ShouldReturnFail_WhenIdIsNull(){
+        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(1);
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(null, putProduct));
+    }
+
+    @Test
+    void putProduct_ShouldReturnFail_WhenIdNotFound(){
+        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(1);
+        assertThrows(ProductNotFoundException.class, () -> productService.putProduct(1L, putProduct));
+    }
+
+    @Test
+    void putProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
+        Product product = new Product(
+                1L,
+                "ProductTest",
+                new BigDecimal("1.99"),
+                10
+        );
+        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(-1);
+
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(null, putProduct));
+    }
+
+    @Test
+    void putProduct_ShouldReturnFail_WhenQuantityIsNull(){
+        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(null);
+
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(1L, putProduct));
     }
 
 
