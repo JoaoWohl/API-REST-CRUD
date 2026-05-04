@@ -54,7 +54,7 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/put")
-    public ResponseEntity<?> putProduct(@PathVariable Long id, @RequestBody @Valid UpdateProductDTO product){
+    public ResponseEntity<?> putProduct(@PathVariable Long id, @RequestBody @Valid WithdrawOrPutProductDTO product){
         service.putProduct(id,product);
         return ResponseEntity.ok("Produto Colocado no Estoque com Sucesso");
     }

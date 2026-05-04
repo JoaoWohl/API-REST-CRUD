@@ -307,8 +307,7 @@ class ProductServiceTest {
         productService.withdrawProduct(1L, withdrawProduct);
 
         verify(productRepository).save(argThat(p ->
-            p != null
-                && p.getId() == 1L
+                p.getId() == 1L
                 && p.getName().equals("ProductTest")
                 && p.getPrice().equals(new BigDecimal("1.99"))
                 && p.getQuantity() == 9
@@ -391,12 +390,6 @@ class ProductServiceTest {
 
     @Test
     void putProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
-        Product product = new Product(
-                1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10
-        );
         WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(-1);
 
         assertThrows(IllegalArgumentException.class, () -> productService.putProduct(null, putProduct));
