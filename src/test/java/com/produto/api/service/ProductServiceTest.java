@@ -108,6 +108,8 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
     }
 
+
+
     @Test
     void findAll_ShouldReturnSuccess_WhenAllOk() {
         Product product = new Product(
@@ -161,5 +163,32 @@ class ProductServiceTest {
     @Test
     void findById_ShouldReturnFail_WhenIdNotFound() {
         assertThrows(ProductNotFoundException.class, () -> productService.findById(1L));
+    }
+
+
+
+    @Test
+    void deleteProduct_ShouldReturnSuccess_WhenAllOk(){
+         Product product = new Product(
+                 1L,
+                 "ProductTest",
+                 new BigDecimal("1.99"),
+                 10
+         );
+         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+         productService.deleteProduct(1L);
+
+        verify(productRepository).deleteById(1L);
+    }
+
+    @Test
+    void deleteProduct_ShouldReturnFail_WhenIdIsNull(){
+        assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(null));
+    }
+
+    @Test
+    void deleteProduct_ShouldReturnFail_WhenIdNotFound(){
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
     }
 }
