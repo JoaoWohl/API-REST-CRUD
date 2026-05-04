@@ -2,8 +2,10 @@ package com.produto.api.service;
 
 import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
+import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.entity.Product;
+import com.produto.api.exception.NotEnoghProductException;
 import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
 import com.produto.api.repository.ProductRepository;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -288,4 +291,68 @@ class ProductServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
     }
+
+
+
+    @Test
+    void withdrawProduct_ShouldReturnSuccess_WhenAllOk(){
+        Product product = new Product(
+                1L,
+                "ProductTest",
+                new BigDecimal("1.99"),
+                10
+        );
+        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(1);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        productService.withdrawProduct(1L, withdrawProduct);
+
+        verify(productRepository).save(argThat(p ->
+            p != null
+                && p.getId() == 1L
+                && p.getName().equals("ProductTest")
+                && p.getPrice().equals(new BigDecimal("1.99"))
+                && p.getQuantity() == 9
+        ));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenIdIsNull(){
+        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(1);
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(null, withdrawProduct));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenIdNotFound(){
+        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(1);
+        assertThrows(ProductNotFoundException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
+        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(-1);
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenQuantityIsNull(){
+        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(null);
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenQuantityIsGreaterThanStock(){
+        Product product = new Product(
+                1L,
+                "ProductTest",
+                new BigDecimal("1.99"),
+                10
+        );
+        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(11);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
+    }
+
+
 }
