@@ -1,6 +1,7 @@
 package com.produto.api.service;
 
 import com.produto.api.dto.request.product.AddProductDTO;
+import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.entity.Product;
 import com.produto.api.exception.ProductNotFoundException;
@@ -19,8 +20,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceTest {
@@ -190,5 +190,102 @@ class ProductServiceTest {
     @Test
     void deleteProduct_ShouldReturnFail_WhenIdNotFound(){
         assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
+    }
+
+
+
+    @Test
+    void updateProduct_ShouldReturnSuccess_WhenAllOk(){
+        Product product = new Product(
+                1L,
+                "ProductTestOldName",
+                new BigDecimal("1.99"),
+                10
+        );
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("2.99"),
+                20
+        );
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        productService.updateProduct(1L, update);
+
+        verify(productRepository).save(product);
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenIdIsNull(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("2.99"),
+                20
+        );
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(null, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenIdIsNotFound(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("2.99"),
+                20
+        );
+        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenNameIsNull(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                null,
+                new BigDecimal("2.99"),
+                20
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenNameIsEmpty(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "",
+                new BigDecimal("2.99"),
+                20
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenPriceIsNull(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                null,
+                20
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenPriceIsLessThanZero(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("-1.99"),
+                20
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("1.99"),
+                -20
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
     }
 }
