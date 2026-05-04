@@ -3,6 +3,7 @@ package com.produto.api.service;
 import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.entity.Product;
+import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
 import com.produto.api.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -108,7 +110,6 @@ class ProductServiceTest {
 
     @Test
     void findAll_ShouldReturnSuccess_WhenAllOk() {
-//        Arrange
         Product product = new Product(
                 1L,
                 "ProductTest",
@@ -125,10 +126,40 @@ class ProductServiceTest {
         when(mapper.toDTO(product)).thenReturn(dto);
         when(productRepository.findAll()).thenReturn(products);
 
-//        Act
         List<ResponseProductDTO> result = productService.findAll();
 
-//        Assert
         assertEquals(dtos, result);
+    }
+
+    @Test
+    void findById_ShouldReturnSuccess_WhenIdOk() {
+        Product product = new Product(
+              1L,
+              "ProductTest",
+              new BigDecimal("1.99"),
+              10);
+
+        ResponseProductDTO dto = new ResponseProductDTO(
+                1L,
+                "ProductTest",
+                new BigDecimal("1.99"),
+                10);
+
+        when(mapper.toDTO(product)).thenReturn(dto);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        ResponseProductDTO result = productService.findById(1L);
+
+        assertEquals(dto, result);
+    }
+
+    @Test
+    void findById_ShouldReturnFail_WhenIdIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> productService.findById(null));
+    }
+
+    @Test
+    void findById_ShouldReturnFail_WhenIdNotFound() {
+        assertThrows(ProductNotFoundException.class, () -> productService.findById(1L));
     }
 }
