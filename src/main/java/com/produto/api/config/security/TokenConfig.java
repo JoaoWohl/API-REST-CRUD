@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Service
 public class TokenConfig {
-    @Value("${JWT_SECRET}")
+    @Value("${app.jwt-secret}")
     private String secret;
 
     public String generateToken(User user) {
