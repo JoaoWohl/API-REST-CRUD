@@ -110,8 +110,6 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
     }
 
-
-
     @Test
     void findAll_ShouldReturnSuccess_WhenAllOk() {
         Product product = new Product(
@@ -167,8 +165,6 @@ class ProductServiceTest {
         assertThrows(ProductNotFoundException.class, () -> productService.findById(1L));
     }
 
-
-
     @Test
     void deleteProduct_ShouldReturnSuccess_WhenAllOk(){
          Product product = new Product(
@@ -193,8 +189,6 @@ class ProductServiceTest {
     void deleteProduct_ShouldReturnFail_WhenIdNotFound(){
         assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
     }
-
-
 
     @Test
     void updateProduct_ShouldReturnSuccess_WhenAllOk(){
@@ -291,8 +285,6 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
     }
 
-
-
     @Test
     void withdrawProduct_ShouldReturnSuccess_WhenAllOk(){
         Product product = new Product(
@@ -352,8 +344,6 @@ class ProductServiceTest {
         assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
     }
 
-
-
     @Test
     void putProduct_ShouldReturnSuccess_WhenAllOk(){
         Product product = new Product(
@@ -401,6 +391,5 @@ class ProductServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> productService.putProduct(1L, putProduct));
     }
-
 
 }
