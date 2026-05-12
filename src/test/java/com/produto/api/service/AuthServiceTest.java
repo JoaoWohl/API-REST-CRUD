@@ -2,6 +2,7 @@ package com.produto.api.service;
 
 import com.produto.api.config.security.TokenConfig;
 import com.produto.api.dto.request.user.LoginRequestDTO;
+import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
@@ -18,7 +19,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -71,5 +71,30 @@ class AuthServiceTest {
         assertThrows(AuthenticationException.class, () -> authService.login(request));
         verify(tokenConfig, never()).generateToken(any());
     }
+
+    @Test
+    void login_ShowldReturnFail_WhenPasswordIsNull(){
+        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com",null);
+        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    }
+
+    @Test
+    void login_ShowldReturnFail_WhenPasswordIsEmpty(){
+        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","");
+        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    }
+
+    @Test
+    void login_ShowldReturnFail_WhenLoginIsNull(){
+        LoginRequestDTO request = new LoginRequestDTO(null,"TestPassword");
+        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    }
+
+    @Test
+    void login_ShowldReturnFail_WhenLoginIsEmpty(){
+        LoginRequestDTO request = new LoginRequestDTO("","TestPassword");
+        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    }
+
 
 }
