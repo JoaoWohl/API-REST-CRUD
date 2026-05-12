@@ -66,9 +66,10 @@ public class AuthService {
     }
 
     public RegisterUserResponseDTO registerAdmin(RegisterUserRequestDTO request){
-        if (repository.existsByLogin(request.login())){
-            throw new UserExistException();
-        }
+        if (repository.existsByLogin(request.login())) throw new UserExistException();
+        if (request.name() == null || request.name().isEmpty()) throw new IllegalArgumentException();
+        if (request.login() == null || request.login().isEmpty()) throw new IllegalArgumentException();
+        if (request.password() == null ||request.password().isEmpty()) throw new IllegalArgumentException();
 
         User newUser = new User();
         newUser.setName(request.name());
