@@ -190,4 +190,87 @@ class AuthServiceTest {
 
         assertThrows(IllegalArgumentException.class,() -> authService.register(request));
     }
+
+    @Test
+    void registerAdmin_ShowldReturnSuccess_WhenEverthingOkay(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+        when(encoder.encode(request.password())).thenReturn("EncodedPassword");
+
+        RegisterUserResponseDTO result = authService.registerAdmin(request);
+
+        assertEquals(new RegisterUserResponseDTO("TestName","TestEmail@test.com"), result);
+        verify(userRepository).save(argThat(u ->
+                u.getName().equals("TestName")
+                && u.getLogin().equals(request.login())
+                && u.getPassword().equals("EncodedPassword")
+                && u.getRole().equals(UserRole.ADMIN)
+        ));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnSuccess_WhenRoleIsNull(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",null);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+        when(encoder.encode(request.password())).thenReturn("EncodedPassword");
+
+        RegisterUserResponseDTO result = authService.registerAdmin(request);
+
+        assertEquals(new RegisterUserResponseDTO("TestName","TestEmail@test.com"), result);
+        verify(userRepository).save(argThat(u ->
+                u.getName().equals("TestName")
+                && u.getLogin().equals(request.login())
+                && u.getPassword().equals("EncodedPassword")
+                && u.getRole().equals(UserRole.USER)
+        ));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnFail_WhenNameIsNull(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO(null,"TestEmail@test.com","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnFail_WhenNameIsEmpty(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("","TestEmail@test.com","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnFail_WhenLoginIsNull(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName",null,"TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnFail_WhenLoginIsEmpty(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnFail_WhenPasswordIsNull(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com",null,UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
+    void registerAdmin_ShowldReturnFail_WhenPasswordIsEmpty(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
 }
