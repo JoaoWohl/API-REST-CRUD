@@ -29,8 +29,8 @@ public class AuthService {
     private TokenConfig tokenConfig;
 
     public LoginResponseDTO login(LoginRequestDTO request){
-        if (request.login() == null || request.login().isEmpty()) throw new IllegalArgumentException();
-        if (request.password() == null || request.password().isEmpty()) throw new IllegalArgumentException();
+        if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
+        if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
         if (!repository.existsByLogin(request.login())) throw new UserNotFoundException();
 
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(),request.password());
@@ -44,9 +44,9 @@ public class AuthService {
 
     public RegisterUserResponseDTO register(RegisterUserRequestDTO request){
         if (repository.existsByLogin(request.login())) throw new UserExistException();
-        if (request.name() == null || request.name().isEmpty()) throw new IllegalArgumentException();
-        if (request.password() == null || request.password().isEmpty()) throw new IllegalArgumentException();
-        if (request.login() == null || request.login().isEmpty())throw new IllegalArgumentException();
+        if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
+        if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
+        if (request.login() == null || request.login().isEmpty() || request.login().isBlank())throw new IllegalArgumentException();
 
         User newUser = new User();
         newUser.setName(request.name());
@@ -61,9 +61,9 @@ public class AuthService {
 
     public RegisterUserResponseDTO registerAdmin(RegisterUserRequestDTO request){
         if (repository.existsByLogin(request.login())) throw new UserExistException();
-        if (request.name() == null || request.name().isEmpty()) throw new IllegalArgumentException();
-        if (request.login() == null || request.login().isEmpty()) throw new IllegalArgumentException();
-        if (request.password() == null ||request.password().isEmpty()) throw new IllegalArgumentException();
+        if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
+        if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
+        if (request.password() == null ||request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
 
         User newUser = new User();
         newUser.setName(request.name());
