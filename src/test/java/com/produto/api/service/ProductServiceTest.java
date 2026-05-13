@@ -71,6 +71,16 @@ class ProductServiceTest {
     }
 
     @Test
+    void addProduct_ShouldReturnFail_WhenNameIsBlank() {
+        AddProductDTO newProduct = new AddProductDTO(
+                " ",
+                new BigDecimal("1.99"),
+                10);
+
+        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
+    }
+
+    @Test
     void addProduct_ShouldReturnFail_WhenPriceIsLessThanZero() {
         AddProductDTO newProduct = new AddProductDTO(
                 "ProductTest",
