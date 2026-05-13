@@ -29,15 +29,9 @@ public class AuthService {
     private TokenConfig tokenConfig;
 
     public LoginResponseDTO login(LoginRequestDTO request){
-        if (request.login() == null || request.login().isEmpty()){
-            throw new IllegalArgumentException();
-        }
-        if (request.password() == null || request.password().isEmpty()){
-            throw new IllegalArgumentException();
-        }
-        if (!repository.existsByLogin(request.login())){
-            throw new UserNotFoundException();
-        }
+        if (request.login() == null || request.login().isEmpty()) throw new IllegalArgumentException();
+        if (request.password() == null || request.password().isEmpty()) throw new IllegalArgumentException();
+        if (!repository.existsByLogin(request.login())) throw new UserNotFoundException();
 
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(),request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);
