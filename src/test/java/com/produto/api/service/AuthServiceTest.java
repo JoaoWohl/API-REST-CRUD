@@ -43,7 +43,7 @@ class AuthServiceTest {
     AuthService authService;
 
     @Test
-    void login_ShowldReturnSuccess_WhenEverthingOkay() {
+    void login_ShouldReturnSuccess_WhenEverythingOkay() {
         User user = new User("id-1","TestName","TestEmail@test.com","TestPassword",UserRole.USER);
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestPassword");
 
@@ -61,13 +61,13 @@ class AuthServiceTest {
     }
 
     @Test
-    void login_ShowldReturnFail_WhenUserDoNotExist() {
+    void login_ShouldReturnFail_WhenUserDoNotExist() {
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestPassword");
         assertThrows(UserNotFoundException.class,() -> authService.login(request));
     }
 
     @Test
-    void login_ShowldReturnFail_WhenPasswordIsWrong() {
+    void login_ShouldReturnFail_WhenPasswordIsWrong() {
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestWrongPassword");
 
         when(userRepository.existsByLogin(request.login())).thenReturn(true);
@@ -78,31 +78,31 @@ class AuthServiceTest {
     }
 
     @Test
-    void login_ShowldReturnFail_WhenPasswordIsNull(){
+    void login_ShouldReturnFail_WhenPasswordIsNull(){
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com",null);
         assertThrows(IllegalArgumentException.class,() -> authService.login(request));
     }
 
     @Test
-    void login_ShowldReturnFail_WhenPasswordIsEmpty(){
+    void login_ShouldReturnFail_WhenPasswordIsEmpty(){
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","");
         assertThrows(IllegalArgumentException.class,() -> authService.login(request));
     }
 
     @Test
-    void login_ShowldReturnFail_WhenLoginIsNull(){
+    void login_ShouldReturnFail_WhenLoginIsNull(){
         LoginRequestDTO request = new LoginRequestDTO(null,"TestPassword");
         assertThrows(IllegalArgumentException.class,() -> authService.login(request));
     }
 
     @Test
-    void login_ShowldReturnFail_WhenLoginIsEmpty(){
+    void login_ShouldReturnFail_WhenLoginIsEmpty(){
         LoginRequestDTO request = new LoginRequestDTO("","TestPassword");
         assertThrows(IllegalArgumentException.class,() -> authService.login(request));
     }
 
     @Test
-    void register_ShowldReturnSuccess_WhenEverthingOkay(){
+    void register_ShouldReturnSuccess_WhenEverythingOkay(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
@@ -119,7 +119,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnSuccess_WhenUserRoleIsNull(){
+    void register_ShouldReturnSuccess_WhenUserRoleIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",null);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
@@ -136,7 +136,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenUserExist(){
+    void register_ShouldReturnFail_WhenUserExist(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(true);
 
@@ -144,7 +144,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenNameIsNull(){
+    void register_ShouldReturnFail_WhenNameIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO(null,"TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -152,7 +152,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenNameIsEmpty(){
+    void register_ShouldReturnFail_WhenNameIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("","TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -160,7 +160,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenLoginIsNull(){
+    void register_ShouldReturnFail_WhenLoginIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName",null,"TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -168,7 +168,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenLoginIsEmpty(){
+    void register_ShouldReturnFail_WhenLoginIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -176,7 +176,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenPasswordIsNull(){
+    void register_ShouldReturnFail_WhenPasswordIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com",null,UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -184,7 +184,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_ShowldReturnFail_WhenPasswordIsEmpty(){
+    void register_ShouldReturnFail_WhenPasswordIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -192,7 +192,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnSuccess_WhenEverthingOkay(){
+    void registerAdmin_ShouldReturnSuccess_WhenEverythingOkay(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
@@ -209,7 +209,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnSuccess_WhenRoleIsNull(){
+    void registerAdmin_ShouldReturnSuccess_WhenRoleIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",null);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
@@ -226,7 +226,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnFail_WhenNameIsNull(){
+    void registerAdmin_ShouldReturnFail_WhenNameIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO(null,"TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -234,7 +234,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnFail_WhenNameIsEmpty(){
+    void registerAdmin_ShouldReturnFail_WhenNameIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("","TestEmail@test.com","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -242,7 +242,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnFail_WhenLoginIsNull(){
+    void registerAdmin_ShouldReturnFail_WhenLoginIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName",null,"TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -250,7 +250,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnFail_WhenLoginIsEmpty(){
+    void registerAdmin_ShouldReturnFail_WhenLoginIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","","TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -258,7 +258,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnFail_WhenPasswordIsNull(){
+    void registerAdmin_ShouldReturnFail_WhenPasswordIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com",null,UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
@@ -266,7 +266,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void registerAdmin_ShowldReturnFail_WhenPasswordIsEmpty(){
+    void registerAdmin_ShouldReturnFail_WhenPasswordIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
