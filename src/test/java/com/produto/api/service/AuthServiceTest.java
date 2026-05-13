@@ -90,6 +90,12 @@ class AuthServiceTest {
     }
 
     @Test
+    void login_ShouldReturnFail_WhenPasswordIsBlank(){
+        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com"," ");
+        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    }
+
+    @Test
     void login_ShouldReturnFail_WhenLoginIsNull(){
         LoginRequestDTO request = new LoginRequestDTO(null,"TestPassword");
         assertThrows(IllegalArgumentException.class,() -> authService.login(request));
@@ -98,6 +104,12 @@ class AuthServiceTest {
     @Test
     void login_ShouldReturnFail_WhenLoginIsEmpty(){
         LoginRequestDTO request = new LoginRequestDTO("","TestPassword");
+        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    }
+
+    @Test
+    void login_ShouldReturnFail_WhenLoginIsBlank(){
+        LoginRequestDTO request = new LoginRequestDTO(" ","TestPassword");
         assertThrows(IllegalArgumentException.class,() -> authService.login(request));
     }
 
@@ -160,6 +172,14 @@ class AuthServiceTest {
     }
 
     @Test
+    void register_ShouldReturnFail_WhenNameIsBlank(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO(" ","TestEmail@test.com","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.register(request));
+    }
+
+    @Test
     void register_ShouldReturnFail_WhenLoginIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName",null,"TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
@@ -176,6 +196,14 @@ class AuthServiceTest {
     }
 
     @Test
+    void register_ShouldReturnFail_WhenLoginIsBlank(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName"," ","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.register(request));
+    }
+
+    @Test
     void register_ShouldReturnFail_WhenPasswordIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com",null,UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
@@ -186,6 +214,14 @@ class AuthServiceTest {
     @Test
     void register_ShouldReturnFail_WhenPasswordIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.register(request));
+    }
+
+    @Test
+    void register_ShouldReturnFail_WhenPasswordIsBlank(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com"," ",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,() -> authService.register(request));
@@ -242,6 +278,14 @@ class AuthServiceTest {
     }
 
     @Test
+    void registerAdmin_ShouldReturnFail_WhenNameIsBlank(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO(" ","TestEmail@test.com","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
     void registerAdmin_ShouldReturnFail_WhenLoginIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName",null,"TestPassword",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
@@ -258,6 +302,14 @@ class AuthServiceTest {
     }
 
     @Test
+    void registerAdmin_ShouldReturnFail_WhenLoginIsBlank(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName"," ","TestPassword",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
     void registerAdmin_ShouldReturnFail_WhenPasswordIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com",null,UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
@@ -268,6 +320,14 @@ class AuthServiceTest {
     @Test
     void registerAdmin_ShouldReturnFail_WhenPasswordIsEmpty(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","",UserRole.ADMIN);
+        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
+    }
+
+    @Test
+    void registerAdmin_ShouldReturnFail_WhenPasswordIsBlank(){
+        RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com"," ",UserRole.ADMIN);
         when(userRepository.existsByLogin(request.login())).thenReturn(false);
 
         assertThrows(IllegalArgumentException.class,() -> authService.registerAdmin(request));
