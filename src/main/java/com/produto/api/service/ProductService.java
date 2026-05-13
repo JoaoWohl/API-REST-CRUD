@@ -24,13 +24,9 @@ public class ProductService {
     ProductMapper mapper;
 
     public void addProduct(AddProductDTO product) {
-        if (product.quantity() == null || product.quantity() < 0) {
-            throw new IllegalArgumentException();
-        } else if (product.name() == null || product.name().isEmpty()) {
-            throw new IllegalArgumentException();
-        } else if(product.price() == null || product.price().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException();
-        }
+        if (product.quantity() == null || product.quantity() < 0) throw new IllegalArgumentException();
+        if (product.name() == null || product.name().isEmpty() || product.name().isBlank()) throw new IllegalArgumentException();
+        if(product.price() == null || product.price().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException();
         repository.save(mapper.toEntityAdd(product));
     }
 
