@@ -64,7 +64,7 @@ public class ProductService {
         if (withdrawProduct.quantity() == null || withdrawProduct.quantity() < 0) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
         Product produto = repository.findById(id).get();
-        if (produto.getQuantity() == 0 || produto.getQuantity() < withdrawProduct.quantity()) throw new NotEnoghProductException("Not enough products in stock");
+        if (produto.getQuantity() < withdrawProduct.quantity()) throw new NotEnoghProductException("Not enough products in stock");
         produto.setQuantity(produto.getQuantity()-withdrawProduct.quantity());
         repository.save(produto);
     }
