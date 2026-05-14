@@ -392,7 +392,7 @@ class ProductServiceTest {
     void putProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
         WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(-1);
 
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(null, putProduct));
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(1L, putProduct));
     }
 
     @Test
