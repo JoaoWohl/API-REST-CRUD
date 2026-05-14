@@ -296,6 +296,17 @@ class ProductServiceTest {
     }
 
     @Test
+    void updateProduct_ShouldReturnFail_WhenQuantityIsNull(){
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("1.99"),
+                null
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
     void withdrawProduct_ShouldReturnSuccess_WhenAllOk(){
         Product product = new Product(
                 1L,
