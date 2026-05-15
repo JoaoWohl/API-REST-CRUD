@@ -1,6 +1,6 @@
 package com.produto.api.service;
 
-import com.produto.api.config.security.TokenConfig;
+import com.produto.api.service.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
@@ -26,7 +26,7 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private TokenConfig tokenConfig;
+    private JwtTokenService tokenConfig;
 
     public LoginResponseDTO login(LoginRequestDTO request){
         if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();

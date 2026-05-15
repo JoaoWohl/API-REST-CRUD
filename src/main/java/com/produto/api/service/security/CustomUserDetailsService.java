@@ -1,4 +1,4 @@
-package com.produto.api.config.security;
+package com.produto.api.service.security;
 
 
 import com.produto.api.repository.UserRepository;
@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthConfig implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     UserRepository repository;

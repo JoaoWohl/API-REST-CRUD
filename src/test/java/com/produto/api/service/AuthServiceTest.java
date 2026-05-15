@@ -1,6 +1,6 @@
 package com.produto.api.service;
 
-import com.produto.api.config.security.TokenConfig;
+import com.produto.api.service.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
@@ -35,7 +35,7 @@ class AuthServiceTest {
     @Mock
     AuthenticationManager authenticationManager;
     @Mock
-    TokenConfig tokenConfig;
+    JwtTokenService tokenConfig;
     @Mock
     PasswordEncoder encoder;
 

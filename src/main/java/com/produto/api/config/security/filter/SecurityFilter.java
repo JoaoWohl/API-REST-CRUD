@@ -1,6 +1,8 @@
-package com.produto.api.config.security;
+package com.produto.api.config.security.filter;
 
+import com.produto.api.config.security.jwt.JWTUserData;
 import com.produto.api.repository.UserRepository;
+import com.produto.api.service.security.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +21,7 @@ import java.util.Optional;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
-    private TokenConfig  tokenConfig;
+    private JwtTokenService tokenConfig;
     @Autowired
     private UserRepository userRepository;
 
