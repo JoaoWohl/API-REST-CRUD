@@ -1,4 +1,4 @@
-package com.produto.api.service;
+package com.produto.api.unitarios.service;
 
 import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
@@ -9,6 +9,7 @@ import com.produto.api.exception.NotEnoghProductException;
 import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
 import com.produto.api.repository.ProductRepository;
+import com.produto.api.service.ProductService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,10 +1,11 @@
-package com.produto.api.service.security;
+package com.produto.api.unitarios.service.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.produto.api.config.security.jwt.JWTUserData;
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
+import com.produto.api.service.security.JwtTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

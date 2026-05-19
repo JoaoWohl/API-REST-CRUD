@@ -1,8 +1,9 @@
-package com.produto.api.service.security;
+package com.produto.api.unitarios.service.security;
 
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
 import com.produto.api.repository.UserRepository;
+import com.produto.api.service.security.CustomUserDetailsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,5 +1,6 @@
-package com.produto.api.service;
+package com.produto.api.unitarios.service;
 
+import com.produto.api.service.AuthService;
 import com.produto.api.service.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
