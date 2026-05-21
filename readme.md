@@ -130,6 +130,15 @@ mvn spring-boot:run
 | `API_PORT`    | Porta que será exposta pela API                           | `8080`                               |
 | `JWT_SECRET`  | Chave de criptografia do JWT                              | `Chave-Longa-Super-Secreta-Para-JWT` |
 ---
+## 📄 Documentação
+ 
+A API conta com documentação interativa gerada pelo **Swagger UI**, onde é possível visualizar todos os endpoints, os parâmetros esperados, os possíveis retornos e testá-los diretamente pelo navegador.
+ 
+Com a aplicação rodando, acesse:
+ 
+```
+http://localhost:8080/swagger-ui.html
+```
 
 ## 💡 Funcionalidades
 <!-- Aqui será descrito as funcionalidades da aplicação. -->
@@ -267,6 +276,11 @@ requisições e validar o token antes de chegar nos endpoints
 - **Controle de acesso por roles** — protegendo endpoints de acordo com o
 perfil do usuário (ex: ADMIN, USER)
 - **Proteção de endpoints** — configuração de rotas públicas e privadas no SecurityFilterChain
+
+### V4 - Documentação com Swagger 📄
+
+- **Documentação de APIs com OpenAPI/Swagger** — descrevendo endpoints, parâmetros e respostas de forma padronizada
+- **Boas práticas de documentação** — entendendo o que vale a pena documentar e o que é excesso, focando no que agrega valor para quem consome a API
 
 ## 👨‍💻 João V. Santos Wohl
 💻 Portfolio | [🔗 Linkedin](https://www.linkedin.com/in/joao-wohl) | [✉️ Email](mailto:joaovitorsantoswohl9@gmail.com)
