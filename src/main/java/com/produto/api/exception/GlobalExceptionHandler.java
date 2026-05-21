@@ -16,6 +16,20 @@ import java.util.List;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(NotEnoghProductException.class)
+    private ResponseEntity<ErrorResponse>  notEnoghProductHandler(NotEnoghProductException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = ErrorResponse.builder()
+                .status(status.value())
+                .timestamp(OffsetDateTime.now())
+                .type(request.getRequestURI())
+                .title("Not Enough Product")
+                .detail("Não há produtos suficientes em estoque")
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
+
     @ExceptionHandler(ProductNotFoundException.class)
     private ResponseEntity<ErrorResponse> productNotFoundHandler(ProductNotFoundException ex, HttpServletRequest request){
         HttpStatus status = HttpStatus.NOT_FOUND;
@@ -96,4 +110,5 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(status).body(error);
     }
+
 }
