@@ -4,8 +4,11 @@ import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.dto.response.user.RegisterUserResponseDTO;
+import com.produto.api.exception.ErrorResponse;
 import com.produto.api.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +31,7 @@ public class AuthController {
     @Operation(summary = "Faz autenticação do usuário")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuário autenticado"),
-            @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
@@ -39,7 +42,7 @@ public class AuthController {
     @Operation(summary = "Cadastra novo usuário")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuário cadastrado com sucesso"),
-            @ApiResponse(responseCode = "409", description = "Usuário existente"),
+            @ApiResponse(responseCode = "409", description = "Usuário existente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponseDTO> register(@RequestBody @Valid RegisterUserRequestDTO request) {
@@ -50,12 +53,11 @@ public class AuthController {
     @Operation(summary = "Cadastra novo usuário com role específica")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Usuário cadastrado com sucesso"),
-            @ApiResponse(responseCode = "409", description = "Usuário existente"),
+            @ApiResponse(responseCode = "409", description = "Usuário existente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/admin/register")
     public ResponseEntity<RegisterUserResponseDTO> adminRegister(@RequestBody @Valid RegisterUserRequestDTO request) {
         RegisterUserResponseDTO response = service.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
 }
