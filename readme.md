@@ -2,11 +2,12 @@
 <div align="center">
 
 ![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-orange?style=flat-square)
+![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen?style=flat-square)
+![Coverage](https://img.shields.io/badge/Coverage-92%25-brightgreen?style=flat-square)
 
 </div>
 
 <p align="center">
-    <!--Aqui vai ter uma descrição do projeto-->
     API-REST-CRUD de produtos com autenticação e permissão através de JWT e dockerização com Docker Compose
 </p>
 
@@ -234,11 +235,14 @@ http://localhost:8080/swagger-ui.html
 ![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat-square&logo=postgresql&logoColor=white)
+![H2](https://img.shields.io/badge/H2-004088?style=flat-square&logo=h2&logoColor=white)
 ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=flat-square&logo=spring&logoColor=white)
 ![JUnit](https://img.shields.io/badge/JUnit5-25A162?style=flat-square&logo=junit5&logoColor=white)
 ![Mockito](https://img.shields.io/badge/Mockito-78A641?style=flat-square&logo=mockito&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat-square&logo=swagger&logoColor=black)
+![JaCoCo](https://img.shields.io/badge/JaCoCo-C71A36?style=flat-square&logo=apachemaven&logoColor=white)
 
 
 ## 📚 Aprendizados
@@ -277,10 +281,14 @@ requisições e validar o token antes de chegar nos endpoints
 perfil do usuário (ex: ADMIN, USER)
 - **Proteção de endpoints** — configuração de rotas públicas e privadas no SecurityFilterChain
 
-### V4 - Documentação com Swagger 📄
+### V4 - Documentação com Swagger e Testes 📄🧪
 
 - **Documentação de APIs com OpenAPI/Swagger** — descrevendo endpoints, parâmetros e respostas de forma padronizada
 - **Boas práticas de documentação** — entendendo o que vale a pena documentar e o que é excesso, focando no que agrega valor para quem consome a API
+- **Testes Unitários com JUnit 5 e Mockito** — cobertura das camadas de service e segurança, testando fluxos de sucesso e falha com mocks isolados
+- **Testes de Integração com Spring Boot Test e H2** — subindo o contexto completo da aplicação com banco em memória para validar o fluxo completo das rotas HTTP, cobrindo autenticação, autorização e operações de produto
+- **Análise de cobertura com JaCoCo** — configuração de relatórios de cobertura atingindo 92% de instruções e 91% de branches
+- **Boas práticas de nomenclatura de testes** — padronização no estilo `método_ShouldReturnX_WhenY` para clareza de intenção
 
 ## 👨‍💻 João V. Santos Wohl
 💻 Portfolio | [🔗 Linkedin](https://www.linkedin.com/in/joao-wohl) | [✉️ Email](mailto:joaovitorsantoswohl9@gmail.com)
