@@ -1,23 +1,22 @@
 package com.produto.api.exception;
 
 import com.produto.api.exception.auth.UserExistException;
-import com.produto.api.exception.auth.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotEnoghProductException.class)
-    private ResponseEntity<ErrorResponse>  notEnoghProductHandler(NotEnoghProductException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse>  notEnoghProductHandler(NotEnoghProductException ex, HttpServletRequest request){
         HttpStatus status = HttpStatus.CONFLICT;
         ErrorResponse error = ErrorResponse.builder()
                 .status(status.value())
@@ -31,7 +30,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ProductNotFoundException.class)
-    private ResponseEntity<ErrorResponse> productNotFoundHandler(ProductNotFoundException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> productNotFoundHandler(ProductNotFoundException ex, HttpServletRequest request){
         HttpStatus status = HttpStatus.NOT_FOUND;
         ErrorResponse erro = ErrorResponse.builder()
                 .status(status.value())
@@ -58,7 +57,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    private ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<ErrorResponse.Field> fields = ex
                 .getBindingResult()
                 .getFieldErrors()
@@ -84,27 +83,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserExistException.class)
-    private ResponseEntity<ErrorResponse> userExistHandler(UserExistException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> userExistHandler(UserExistException ex, HttpServletRequest request){
         HttpStatus status = HttpStatus.CONFLICT;
         ErrorResponse error = ErrorResponse.builder()
                 .status(status.value())
                 .timestamp(OffsetDateTime.now())
                 .type(request.getRequestURI())
                 .title("Usuário Cadastrado")
-                .detail(ex.getMessage())
-                .build();
-
-        return ResponseEntity.status(status).body(error);
-    }
-
-    @ExceptionHandler(UserNotFoundException.class)
-    private ResponseEntity<ErrorResponse> userNotFoundHandler(UserNotFoundException ex, HttpServletRequest request){
-        HttpStatus status = HttpStatus.NOT_FOUND;
-        ErrorResponse error = ErrorResponse.builder()
-                .status(status.value())
-                .timestamp(OffsetDateTime.now())
-                .type(request.getRequestURI())
-                .title("Usuário Não Encontrado")
                 .detail(ex.getMessage())
                 .build();
 

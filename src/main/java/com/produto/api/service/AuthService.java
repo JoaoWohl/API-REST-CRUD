@@ -8,7 +8,6 @@ import com.produto.api.dto.response.user.RegisterUserResponseDTO;
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
 import com.produto.api.exception.auth.UserExistException;
-import com.produto.api.exception.auth.UserNotFoundException;
 import com.produto.api.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +30,6 @@ public class AuthService {
     public LoginResponseDTO login(LoginRequestDTO request){
         if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
         if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
-        if (!repository.existsByLogin(request.login())) throw new UserNotFoundException();
 
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(),request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);

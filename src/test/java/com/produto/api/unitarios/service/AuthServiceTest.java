@@ -9,7 +9,6 @@ import com.produto.api.dto.response.user.RegisterUserResponseDTO;
 import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
 import com.produto.api.exception.auth.UserExistException;
-import com.produto.api.exception.auth.UserNotFoundException;
 import com.produto.api.repository.UserRepository;
 
 import org.junit.jupiter.api.Test;
@@ -59,12 +58,6 @@ class AuthServiceTest {
         LoginResponseDTO response = authService.login(request);
 
         assertEquals("jwt-token",response.token());
-    }
-
-    @Test
-    void login_ShouldReturnFail_WhenUserDoNotExist() {
-        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestPassword");
-        assertThrows(UserNotFoundException.class,() -> authService.login(request));
     }
 
     @Test
