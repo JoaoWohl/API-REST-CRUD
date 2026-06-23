@@ -23,11 +23,13 @@ public class ProductService {
     @Autowired
     ProductMapper mapper;
 
-    public void addProduct(AddProductDTO product) {
+    public ResponseProductDTO addProduct(AddProductDTO product) {
         if (product.quantity() == null || product.quantity() < 0) throw new IllegalArgumentException();
         if (product.name() == null || product.name().isEmpty() || product.name().isBlank()) throw new IllegalArgumentException();
         if(product.price() == null || product.price().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException();
-        repository.save(mapper.toEntityAdd(product));
+        Product newProduct = mapper.toEntityAdd(product);
+        Product response = repository.save(newProduct);
+        return mapper.toDTO(response);
     }
 
     public List<ResponseProductDTO> findAll() {
@@ -41,10 +43,11 @@ public class ProductService {
         return mapper.toDTO(repository.findById(id).get());
     }
 
-    public void deleteProduct(Long id){
+    public ResponseProductDTO deleteProduct(Long id){
         if (id == null) throw new IllegalArgumentException();
-        if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
-        repository.deleteById(id);
+        Product product = repository.findById(id).orElseThrow(() ->  new ProductNotFoundException("Product with id " + id + " not found"));
+        repository.delete(product);
+        return  mapper.toDTO(product);
     }
 
     public void updateProduct(Long id, UpdateProductDTO updatedProduct) {

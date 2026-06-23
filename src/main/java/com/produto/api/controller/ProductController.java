@@ -32,9 +32,9 @@ public class ProductController {
             @ApiResponse(responseCode = "201", description = "Produto Adicionado")
     })
     @PostMapping
-    public ResponseEntity<?> addProduct(@RequestBody @Valid AddProductDTO product){
-        service.addProduct(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Produto adicionado com sucesso");
+    public ResponseEntity<ResponseProductDTO> addProduct(@RequestBody @Valid AddProductDTO product){
+        ResponseProductDTO response = service.addProduct(product);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "Lista todos os produtos")
@@ -63,9 +63,9 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProductById(@PathVariable Long id){
-        service.deleteProduct(id);
-        return ResponseEntity.ok("Produto Excluido com sucesso");
+    public ResponseEntity<ResponseProductDTO> deleteProductById(@PathVariable Long id){
+        ResponseProductDTO response = service.deleteProduct(id);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Atualiza produto de acordo com ID")
