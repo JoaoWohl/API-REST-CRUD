@@ -1,5 +1,6 @@
 package com.produto.api.service;
 
+import com.produto.api.exception.auth.EmailOrPasswordWrongException;
 import com.produto.api.service.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +33,17 @@ public class AuthService {
         if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
         if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
 
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(),request.password());
-        Authentication authentication = authenticationManager.authenticate(userAndPass);
+        try {
+            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(), request.password());
+            Authentication authentication = authenticationManager.authenticate(userAndPass);
 
-        User user = (User) authentication.getPrincipal();
-        String token = tokenConfig.generateToken(user);
+            User user = (User) authentication.getPrincipal();
+            String token = tokenConfig.generateToken(user);
 
-        return new LoginResponseDTO(token);
+            return new LoginResponseDTO(token);
+        } catch (AuthenticationException e) {
+            throw new EmailOrPasswordWrongException();
+        }
     }
 
     public RegisterUserResponseDTO register(RegisterUserRequestDTO request){

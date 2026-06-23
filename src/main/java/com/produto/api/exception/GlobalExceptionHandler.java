@@ -1,5 +1,6 @@
 package com.produto.api.exception;
 
+import com.produto.api.exception.auth.EmailOrPasswordWrongException;
 import com.produto.api.exception.auth.UserExistException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -90,6 +91,20 @@ public class GlobalExceptionHandler {
                 .timestamp(OffsetDateTime.now())
                 .type(request.getRequestURI())
                 .title("Usuário Cadastrado")
+                .detail(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(EmailOrPasswordWrongException.class)
+    public ResponseEntity<ErrorResponse>  emailOrPasswordWrongHandler(EmailOrPasswordWrongException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        ErrorResponse error = ErrorResponse.builder()
+                .status(status.value())
+                .timestamp(OffsetDateTime.now())
+                .type(request.getRequestURI())
+                .title("Email ou Senha Incorreto")
                 .detail(ex.getMessage())
                 .build();
 
