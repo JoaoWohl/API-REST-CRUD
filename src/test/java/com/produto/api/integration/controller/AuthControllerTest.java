@@ -64,7 +64,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    void login_ShouldReturnForbiddenError() throws Exception {
+    void login_WhenLoginIsCorrectAndPasswordIsWrong_ShouldReturnUnauthorized() throws Exception {
         User user = new User();
         user.setLogin("loginTest@test.com");
         user.setPassword(bCryptPasswordEncoder.encode("testPassword"));
@@ -77,17 +77,17 @@ public class AuthControllerTest {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void login_ShouldReturnNotFoundError() throws Exception {
-        LoginRequestDTO request = new LoginRequestDTO("loginTest@test.com","incorrectPassword");
+    void login_WhenUserNotExist_ShouldReturnUnauthorizedError() throws Exception {
+        LoginRequestDTO request = new LoginRequestDTO("loginTest@test.com","testPassword");
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

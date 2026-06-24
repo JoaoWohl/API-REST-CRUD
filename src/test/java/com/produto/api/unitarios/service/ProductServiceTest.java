@@ -188,7 +188,7 @@ class ProductServiceTest {
 
          productService.deleteProduct(1L);
 
-        verify(productRepository).deleteById(1L);
+        verify(productRepository).delete(product);
     }
 
     @Test

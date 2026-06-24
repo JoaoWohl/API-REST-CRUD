@@ -1,5 +1,6 @@
 package com.produto.api.unitarios.service;
 
+import com.produto.api.exception.auth.EmailOrPasswordWrongException;
 import com.produto.api.service.AuthService;
 import com.produto.api.service.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
@@ -20,7 +21,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,8 +47,6 @@ class AuthServiceTest {
         User user = new User("id-1","TestName","TestEmail@test.com","TestPassword",UserRole.USER);
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestPassword");
 
-        when(userRepository.existsByLogin(request.login())).thenReturn(true);
-
         Authentication authentication = mock(Authentication.class);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
         when(authentication.getPrincipal()).thenReturn(user);
@@ -64,10 +62,9 @@ class AuthServiceTest {
     void login_ShouldReturnFail_WhenPasswordIsWrong() {
         LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestWrongPassword");
 
-        when(userRepository.existsByLogin(request.login())).thenReturn(true);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad credentials"));
 
-        assertThrows(AuthenticationException.class, () -> authService.login(request));
+        assertThrows(EmailOrPasswordWrongException.class, () -> authService.login(request));
         verify(tokenConfig, never()).generateToken(any());
     }
 
