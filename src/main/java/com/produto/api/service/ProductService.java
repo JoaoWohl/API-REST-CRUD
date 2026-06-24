@@ -50,7 +50,7 @@ public class ProductService {
         return  mapper.toDTO(product);
     }
 
-    public void updateProduct(Long id, UpdateProductDTO updatedProduct) {
+    public ResponseProductDTO updateProduct(Long id, UpdateProductDTO updatedProduct) {
         if (id == null) throw new IllegalArgumentException();
         if (updatedProduct.name() == null || updatedProduct.name().isEmpty()) throw new IllegalArgumentException();
         if (updatedProduct.quantity() == null || updatedProduct.quantity() < 0) throw new IllegalArgumentException();
@@ -60,9 +60,10 @@ public class ProductService {
         Product produto = repository.findById(id).get();
         mapper.toEntityUpdate(updatedProduct, produto);
         repository.save(produto);
+        return mapper.toDTO(produto);
     }
 
-    public void withdrawProduct(Long id, WithdrawOrPutProductDTO withdrawProduct) {
+    public ResponseProductDTO withdrawProduct(Long id, WithdrawOrPutProductDTO withdrawProduct) {
         if (id == null) throw new IllegalArgumentException();
         if (withdrawProduct.quantity() == null || withdrawProduct.quantity() < 0) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
@@ -70,14 +71,16 @@ public class ProductService {
         if (produto.getQuantity() < withdrawProduct.quantity()) throw new NotEnoghProductException("Not enough products in stock");
         produto.setQuantity(produto.getQuantity()-withdrawProduct.quantity());
         repository.save(produto);
+        return mapper.toDTO(produto);
     }
 
-    public void putProduct(Long id, @Valid WithdrawOrPutProductDTO putProduct) {
+    public ResponseProductDTO putProduct(Long id, @Valid WithdrawOrPutProductDTO putProduct) {
         if (id == null) throw new IllegalArgumentException();
         if (putProduct.quantity() == null || putProduct.quantity() < 0) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
         Product produto = repository.findById(id).get();
         produto.setQuantity(produto.getQuantity()+putProduct.quantity());
         repository.save(produto);
+        return mapper.toDTO(produto);
     }
 }
