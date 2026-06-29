@@ -6,14 +6,17 @@ import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.entity.Product;
 import com.produto.api.exception.NotEnoghProductException;
+import com.produto.api.exception.ProductExistException;
 import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
 import com.produto.api.repository.ProductRepository;
 import com.produto.api.service.ProductService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
@@ -119,6 +122,18 @@ class ProductServiceTest {
                 null);
 
         assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
+    }
+
+    @Test
+    void addProduct_ShouldReturnFail_WhenProductExist() {
+        AddProductDTO newProduct = new AddProductDTO(
+                "ProductTest",
+                new BigDecimal("1.99"),
+                1);
+
+        Mockito.when(productRepository.existsByName("ProductTest")).thenReturn(true);
+
+        assertThrows(ProductExistException.class, () -> productService.addProduct(newProduct));
     }
 
     @Test
@@ -305,6 +320,25 @@ class ProductServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+    }
+
+    @Test
+    void updateProduct_ShouldReturnFail_WhenProductsExists(){
+        Product product = new Product(
+                1L,
+                "ProductTestOldName",
+                new BigDecimal("1.99"),
+                10
+        );
+        UpdateProductDTO update = new UpdateProductDTO(
+                "ProductTestNewName",
+                new BigDecimal("2.99"),
+                20
+        );
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(productRepository.existsByName(update.name())).thenReturn(true);
+
+        assertThrows(ProductExistException.class, () -> productService.updateProduct(1L, update));
     }
 
     @Test

@@ -5,6 +5,7 @@ import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.exception.NotEnoghProductException;
+import com.produto.api.exception.ProductExistException;
 import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
 import com.produto.api.entity.Product;
@@ -27,6 +28,7 @@ public class ProductService {
         if (product.quantity() == null || product.quantity() < 0) throw new IllegalArgumentException();
         if (product.name() == null || product.name().isEmpty() || product.name().isBlank()) throw new IllegalArgumentException();
         if(product.price() == null || product.price().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException();
+        if(repository.existsByName(product.name())) throw new ProductExistException();
         Product newProduct = mapper.toEntityAdd(product);
         Product response = repository.save(newProduct);
         return mapper.toDTO(response);
@@ -56,6 +58,7 @@ public class ProductService {
         if (updatedProduct.quantity() == null || updatedProduct.quantity() < 0) throw new IllegalArgumentException();
         if (updatedProduct.price() == null || updatedProduct.price().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
+        if (repository.existsByName(updatedProduct.name())) throw new ProductExistException();
 
         Product produto = repository.findById(id).get();
         mapper.toEntityUpdate(updatedProduct, produto);

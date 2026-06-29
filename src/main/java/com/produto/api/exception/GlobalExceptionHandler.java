@@ -111,4 +111,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
+    @ExceptionHandler(ProductExistException.class)
+    public ResponseEntity<ErrorResponse>  productExistException(ProductExistException ex, HttpServletRequest request){
+        HttpStatus status = HttpStatus.CONFLICT;
+        ErrorResponse error = ErrorResponse.builder()
+                .status(status.value())
+                .timestamp(OffsetDateTime.now())
+                .type(request.getRequestURI())
+                .title("Produto já cadastrado")
+                .detail(ex.getMessage())
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
+
 }
