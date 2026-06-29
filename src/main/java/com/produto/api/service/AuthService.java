@@ -47,7 +47,7 @@ public class AuthService {
     }
 
     public RegisterUserResponseDTO register(RegisterUserRequestDTO request){
-        if (repository.existsByLogin(request.login())) throw new UserExistException();
+        if (repository.existsByLogin(request.login())) throw new UserExistException("Usuário Já cadastrado");
         if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
         if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
         if (request.login() == null || request.login().isEmpty() || request.login().isBlank())throw new IllegalArgumentException();
@@ -64,7 +64,7 @@ public class AuthService {
     }
 
     public RegisterUserResponseDTO registerAdmin(RegisterUserRequestDTO request){
-        if (repository.existsByLogin(request.login())) throw new UserExistException();
+        if (repository.existsByLogin(request.login())) throw new UserExistException("Usuário Já Cadastrado");
         if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
         if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
         if (request.password() == null ||request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
