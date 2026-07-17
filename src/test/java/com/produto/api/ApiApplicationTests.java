@@ -1,12 +1,9 @@
 package com.produto.api;
 
+import com.produto.api.integration.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class ApiApplicationTests {
+class ApiApplicationTests extends BaseIntegrationTest {
 
 	@Test
 	void contextLoads() {

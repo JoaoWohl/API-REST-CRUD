@@ -5,6 +5,7 @@ import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.entity.Product;
+import com.produto.api.integration.BaseIntegrationTest;
 import com.produto.api.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -30,8 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-public class ProductControllerTest {
+public class ProductControllerTest extends BaseIntegrationTest {
     @Autowired
     MockMvc mockMvc;
 
@@ -257,11 +256,6 @@ public class ProductControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void putProduct_ShouldReturnForbiddenError() throws Exception {
-
     }
 
     //withdrawProduct
