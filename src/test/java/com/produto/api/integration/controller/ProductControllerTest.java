@@ -5,6 +5,7 @@ import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
 import com.produto.api.entity.Product;
+import com.produto.api.integration.BaseIntegrationTest;
 import com.produto.api.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-public class ProductControllerTest {
+public class ProductControllerTest extends BaseIntegrationTest {
     @Autowired
     MockMvc mockMvc;
 
