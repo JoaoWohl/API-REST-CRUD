@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProductService {
@@ -39,20 +40,20 @@ public class ProductService {
         return repository.findAll().stream().map(mapper::toDTO).toList();
     }
 
-    public ResponseProductDTO findById(Long id){
+    public ResponseProductDTO findById(UUID id){
         if(id == null) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
         return mapper.toDTO(repository.findById(id).get());
     }
 
-    public ResponseProductDTO deleteProduct(Long id){
+    public ResponseProductDTO deleteProduct(UUID id){
         if (id == null) throw new IllegalArgumentException();
         Product product = repository.findById(id).orElseThrow(() ->  new ProductNotFoundException("Product with id " + id + " not found"));
         repository.delete(product);
         return  mapper.toDTO(product);
     }
 
-    public ResponseProductDTO updateProduct(Long id, UpdateProductDTO updatedProduct) {
+    public ResponseProductDTO updateProduct(UUID id, UpdateProductDTO updatedProduct) {
         if (id == null) throw new IllegalArgumentException();
         if (updatedProduct.name() == null || updatedProduct.name().isEmpty()) throw new IllegalArgumentException();
         if (updatedProduct.quantity() == null || updatedProduct.quantity() < 0) throw new IllegalArgumentException();
@@ -66,7 +67,7 @@ public class ProductService {
         return mapper.toDTO(produto);
     }
 
-    public ResponseProductDTO withdrawProduct(Long id, WithdrawOrPutProductDTO withdrawProduct) {
+    public ResponseProductDTO withdrawProduct(UUID id, WithdrawOrPutProductDTO withdrawProduct) {
         if (id == null) throw new IllegalArgumentException();
         if (withdrawProduct.quantity() == null || withdrawProduct.quantity() < 0) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
@@ -77,7 +78,7 @@ public class ProductService {
         return mapper.toDTO(produto);
     }
 
-    public ResponseProductDTO putProduct(Long id, @Valid WithdrawOrPutProductDTO putProduct) {
+    public ResponseProductDTO putProduct(UUID id, @Valid WithdrawOrPutProductDTO putProduct) {
         if (id == null) throw new IllegalArgumentException();
         if (putProduct.quantity() == null || putProduct.quantity() < 0) throw new IllegalArgumentException();
         if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");

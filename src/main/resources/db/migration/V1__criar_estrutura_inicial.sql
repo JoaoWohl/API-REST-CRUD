@@ -9,7 +9,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE products (
-    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     price NUMERIC(38, 2) NOT NULL,
     quantity INT NOT NULL
