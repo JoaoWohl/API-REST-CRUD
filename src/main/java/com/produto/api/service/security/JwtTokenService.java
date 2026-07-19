@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JwtTokenService {
@@ -21,7 +22,7 @@ public class JwtTokenService {
         Algorithm algorithm = Algorithm.HMAC256(secret);
 
         return JWT.create()
-                .withSubject(user.getId())
+                .withSubject(user.getId().toString())
                 .withExpiresAt(Instant.now().plusSeconds(8000))
                 .withIssuedAt(Instant.now())
                 .sign(algorithm);
@@ -33,7 +34,7 @@ public class JwtTokenService {
 
             DecodedJWT decode = JWT.require(algorithm).build().verify(token);
             return Optional.of(JWTUserData.builder()
-                    .userId(decode.getSubject())
+                    .userId(UUID.fromString(decode.getSubject()))
                     .build());
         }catch (JWTVerificationException ex) {
             return Optional.empty();
