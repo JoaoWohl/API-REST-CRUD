@@ -26,9 +26,9 @@ public class ProductService {
     ProductMapper mapper;
 
     public ResponseProductDTO addProduct(AddProductDTO product) {
-        if (product.quantity() == null || product.quantity() < 0) throw new IllegalArgumentException();
-        if (product.name() == null || product.name().isEmpty() || product.name().isBlank()) throw new IllegalArgumentException();
-        if(product.price() == null || product.price().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException();
+        if(product.name() == null || product.name().isBlank()) throw new IllegalArgumentException();
+        if (product.quantity() == null || product.quantity() <= 0) throw new IllegalArgumentException();
+        if(product.price() == null || product.price().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException();
         if(repository.existsByName(product.name())) throw new ProductExistException();
         Product newProduct = mapper.toEntityAdd(product);
         Product response = repository.save(newProduct);

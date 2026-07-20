@@ -11,18 +11,23 @@ import com.produto.api.exception.ProductNotFoundException;
 import com.produto.api.mapper.ProductMapper;
 import com.produto.api.repository.ProductRepository;
 import com.produto.api.service.ProductService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,100 +45,69 @@ class ProductServiceTest {
     @InjectMocks
     ProductService productService;
 
-    @Test
-    void addProduct_ShouldReturnSuccess_WhenAllOk() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10);
-        Product product = new Product();
-        when(mapper.toEntityAdd(newProduct)).thenReturn(product);
+    private Product validEntityProduct;
+    private AddProductDTO validAddProductDTO;
+    private ResponseProductDTO validResponseProductDTO;
+    private List<Product> ProductList;
+    private final UUID PRODUCT_ID = UUID.randomUUID();
 
-        productService.addProduct(newProduct);
-
-        verify(productRepository).save(any(Product.class));
+    @BeforeEach
+    void setUp() {
+        validAddProductDTO = new AddProductDTO("Product Name", new BigDecimal("100.99"), 100);
+        validEntityProduct = new Product(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 100);
+        validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 100);
     }
 
     @Test
-    void addProduct_ShouldReturnFail_WhenNameIsEmpty() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "",
-                new BigDecimal("1.99"),
-                10);
+    @DisplayName("Deve retornar successo quando tudo está correto")
+    void addProduct_ShouldReturnSuccess() {
+        when(productRepository.existsByName(validAddProductDTO.name())).thenReturn(false);
+        when(mapper.toEntityAdd(validAddProductDTO)).thenReturn(validEntityProduct);
+        when(productRepository.save(validEntityProduct)).thenReturn(validEntityProduct);
+        when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
+        productService.addProduct(validAddProductDTO);
+
+        verify(productRepository, times(1)).existsByName(anyString());
+        verify(mapper, times(1)).toEntityAdd(any(AddProductDTO.class));
+        verify(productRepository, times(1)).save(any(Product.class));
+        verify(mapper, times(1)).toDTO(any(Product.class));
     }
 
     @Test
-    void addProduct_ShouldReturnFail_WhenNameIsNull() {
-        AddProductDTO newProduct = new AddProductDTO(
-                null,
-                new BigDecimal("1.99"),
-                10);
+    public void addProduct_ShouldReturnProductExistException_WhenProductWithEqualsNameExist() {
+        when(productRepository.existsByName(validAddProductDTO.name())).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
+        assertThrows(ProductExistException.class, () -> productService.addProduct(validAddProductDTO));
+
+        verify(productRepository, times(1)).existsByName(anyString());
+        verify(productRepository, never()).save(any(Product.class));
     }
 
-    @Test
-    void addProduct_ShouldReturnFail_WhenNameIsBlank() {
-        AddProductDTO newProduct = new AddProductDTO(
-                " ",
-                new BigDecimal("1.99"),
-                10);
+    static Stream<Arguments> AddInvalidProducts() {
+        return Stream.of(
+                Arguments.of("Product Name", new BigDecimal("100.99"), -100),
+                Arguments.of("Product Name", new BigDecimal("100.99"), 0),
+                Arguments.of("Product Name", new BigDecimal("100.99"), null),
 
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
+                Arguments.of("Product Name", new BigDecimal("-100.99"), 100),
+                Arguments.of("Product Name", new BigDecimal("0"), 100),
+                Arguments.of("Product Name", null, 100),
+
+                Arguments.of(null, new BigDecimal("100.99"), 100),
+                Arguments.of("", new BigDecimal("100.99"), 100),
+                Arguments.of(" ", new BigDecimal("100.99"), 100)
+                );
     }
 
-    @Test
-    void addProduct_ShouldReturnFail_WhenPriceIsLessThanZero() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "ProductTest",
-                new BigDecimal("-1.99"),
-                10);
+    @ParameterizedTest
+    @MethodSource("AddInvalidProducts")
+    void addProduct_ShouldReturnFail_WhenNameIsEmpty(String name, BigDecimal price, Integer quantity) {
+        AddProductDTO invalidProductDTO = new AddProductDTO(name, price, quantity);
+        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(invalidProductDTO));
 
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
-    }
-
-    @Test
-    void addProduct_ShouldReturnFail_WhenPriceIsNull() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "ProductTest",
-                null,
-                10);
-
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
-    }
-
-    @Test
-    void addProduct_ShouldReturnFail_WhenQuantityIsLessThanZero() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "ProductTest",
-                new BigDecimal("1.99"),
-                -10);
-
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
-    }
-
-    @Test
-    void addProduct_ShouldReturnFail_WhenQuantityIsNull() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "ProductTest",
-                new BigDecimal("1.99"),
-                null);
-
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(newProduct));
-    }
-
-    @Test
-    void addProduct_ShouldReturnFail_WhenProductExist() {
-        AddProductDTO newProduct = new AddProductDTO(
-                "ProductTest",
-                new BigDecimal("1.99"),
-                1);
-
-        Mockito.when(productRepository.existsByName("ProductTest")).thenReturn(true);
-
-        assertThrows(ProductExistException.class, () -> productService.addProduct(newProduct));
+        verify(mapper, never()).toEntityAdd(any(AddProductDTO.class));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
@@ -143,7 +117,7 @@ class ProductServiceTest {
                 "ProductTest",
                 new BigDecimal("1.99"),
                 10);
-        List<Product> products = List.of(product);
+        List<Product> products = List.of(validEntityProduct);
 
         ResponseProductDTO dto = new ResponseProductDTO(1L,
                 "ProductTest",
