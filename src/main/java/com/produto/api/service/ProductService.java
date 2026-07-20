@@ -36,8 +36,9 @@ public class ProductService {
     }
 
     public List<ResponseProductDTO> findAll() {
-        if (repository.findAll().isEmpty()){throw new ProductNotFoundException("No Products found");}
-        return repository.findAll().stream().map(mapper::toDTO).toList();
+        List<Product> products = repository.findAll();
+        if (products.isEmpty()){throw new ProductNotFoundException("No Products found");}
+        return products.stream().map(mapper::toDTO).toList();
     }
 
     public ResponseProductDTO findById(UUID id){
