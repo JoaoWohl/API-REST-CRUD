@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Stream;
@@ -52,6 +51,8 @@ class ProductServiceTest {
     private UpdateProductDTO validUpdateProductDTO;
     private List<Product> productList;
     private final UUID PRODUCT_ID = UUID.randomUUID();
+    private WithdrawOrPutProductDTO withdrawOrPutProductDTO;
+    private WithdrawOrPutProductDTO bigWithdrawOrPutProductDTO;
 
     @BeforeEach
     void setUp() {
@@ -61,6 +62,8 @@ class ProductServiceTest {
         validResponseUpdatedProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name Test", new BigDecimal("200.99"), 200);
         validUpdateProductDTO = new UpdateProductDTO("Product Name Test", new BigDecimal("200.99"), 200);
         validUpdatedEntityProduct = new Product(PRODUCT_ID,"Product Name Test", new BigDecimal("200.99"), 200);
+        withdrawOrPutProductDTO = new WithdrawOrPutProductDTO(10);
+        bigWithdrawOrPutProductDTO = new WithdrawOrPutProductDTO(200);
         productList = List.of(validEntityProduct);
     }
 
@@ -256,62 +259,49 @@ class ProductServiceTest {
     }
 
     @Test
-    void withdrawProduct_ShouldReturnSuccess_WhenAllOk(){
-        Product product = new Product(
-                1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10
+    void withdrawProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
+        ResponseProductDTO withdrawProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 90);
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(mapper.toDTO(any(Product.class))).thenReturn(withdrawProductResponseDTO);
+
+        ResponseProductDTO result = productService.withdrawProduct(PRODUCT_ID, withdrawOrPutProductDTO);
+
+        assertThat(result).isEqualTo(withdrawProductResponseDTO);
+
+        verify(productRepository, times(1)).findById(any());
+        verify(productRepository, times(1)).save(any());
+        verify(mapper, times(1)).toDTO(any(Product.class));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenIdIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(null, withdrawOrPutProductDTO));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenProductIsNotFound() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
+        assertThrows(ProductNotFoundException.class, () -> productService.withdrawProduct(PRODUCT_ID, withdrawOrPutProductDTO));
+    }
+
+    @Test
+    void withdrawProduct_ShouldReturnFail_WhenQuantityIsGreaterThanStock() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(PRODUCT_ID, bigWithdrawOrPutProductDTO));
+    }
+
+    static Stream<Arguments> withdrawOrPutInvalidProducts() {
+        return Stream.of(
+                Arguments.of(0),
+                Arguments.of(-10)
         );
-        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(1);
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-
-        productService.withdrawProduct(1L, withdrawProduct);
-
-        verify(productRepository).save(argThat(p ->
-                p.getId() == 1L
-                && p.getName().equals("ProductTest")
-                && p.getPrice().equals(new BigDecimal("1.99"))
-                && p.getQuantity() == 9
-        ));
     }
 
-    @Test
-    void withdrawProduct_ShouldReturnFail_WhenIdIsNull(){
-        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(1);
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(null, withdrawProduct));
-    }
-
-    @Test
-    void withdrawProduct_ShouldReturnFail_WhenIdNotFound(){
-        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(1);
-        assertThrows(ProductNotFoundException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
-    }
-
-    @Test
-    void withdrawProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
-        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(-1);
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
-    }
-
-    @Test
-    void withdrawProduct_ShouldReturnFail_WhenQuantityIsNull(){
-        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(null);
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
-    }
-
-    @Test
-    void withdrawProduct_ShouldReturnFail_WhenQuantityIsGreaterThanStock(){
-        Product product = new Product(
-                1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10
-        );
-        WithdrawOrPutProductDTO withdrawProduct = new WithdrawOrPutProductDTO(11);
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-
-        assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(1L, withdrawProduct));
+    @ParameterizedTest
+    @MethodSource("withdrawOrPutInvalidProducts")
+    void withdrawProduct_ShouldReturnIllegalArgumentExceptions(int quantity) {
+        WithdrawOrPutProductDTO invalidWithdrawProductDTO = new WithdrawOrPutProductDTO(quantity);
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(PRODUCT_ID, invalidWithdrawProductDTO));
     }
 
     @Test
