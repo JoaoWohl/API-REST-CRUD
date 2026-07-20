@@ -43,8 +43,8 @@ public class ProductService {
 
     public ResponseProductDTO findById(UUID id){
         if(id == null) throw new IllegalArgumentException();
-        if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
-        return mapper.toDTO(repository.findById(id).get());
+        Product result = repository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
+        return mapper.toDTO(result);
     }
 
     public ResponseProductDTO deleteProduct(UUID id){
