@@ -154,28 +154,31 @@ class ProductServiceTest {
     }
 
     @Test
-    void deleteProduct_ShouldReturnSuccess_WhenAllOk(){
-         Product product = new Product(
-                 1L,
-                 "ProductTest",
-                 new BigDecimal("1.99"),
-                 10
-         );
-         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+    void deleteProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-         productService.deleteProduct(1L);
+        ResponseProductDTO result = productService.deleteProduct(PRODUCT_ID);
 
-        verify(productRepository).delete(product);
+        assertThat(result).isEqualTo(validResponseProductDTO);
+
+        verify(productRepository, times(1)).delete(any());
     }
 
     @Test
-    void deleteProduct_ShouldReturnFail_WhenIdIsNull(){
+    void deleteProduct_ShouldReturnFail_WhenIdIsNotFound() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(PRODUCT_ID));
+
+        verify(productRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteProduct_ShouldReturnFail_WhenIdIsNull() {
         assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(null));
-    }
 
-    @Test
-    void deleteProduct_ShouldReturnFail_WhenIdNotFound(){
-        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(1L));
+        verify(productRepository, never()).deleteById(any());
     }
 
     @Test
