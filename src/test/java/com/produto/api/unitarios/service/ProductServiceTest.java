@@ -45,8 +45,11 @@ class ProductServiceTest {
     ProductService productService;
 
     private Product validEntityProduct;
+    private Product validUpdatedEntityProduct;
     private AddProductDTO validAddProductDTO;
     private ResponseProductDTO validResponseProductDTO;
+    private ResponseProductDTO validResponseUpdatedProductDTO;
+    private UpdateProductDTO validUpdateProductDTO;
     private List<Product> productList;
     private final UUID PRODUCT_ID = UUID.randomUUID();
 
@@ -55,6 +58,9 @@ class ProductServiceTest {
         validAddProductDTO = new AddProductDTO("Product Name", new BigDecimal("100.99"), 100);
         validEntityProduct = new Product(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 100);
         validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 100);
+        validResponseUpdatedProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name Test", new BigDecimal("200.99"), 200);
+        validUpdateProductDTO = new UpdateProductDTO("Product Name Test", new BigDecimal("200.99"), 200);
+        validUpdatedEntityProduct = new Product(PRODUCT_ID,"Product Name Test", new BigDecimal("200.99"), 200);
         productList = List.of(validEntityProduct);
     }
 
@@ -84,7 +90,7 @@ class ProductServiceTest {
         verify(productRepository, never()).save(any(Product.class));
     }
 
-    static Stream<Arguments> AddInvalidProducts() {
+    static Stream<Arguments> addInvalidProducts() {
         return Stream.of(
                 Arguments.of("Product Name", new BigDecimal("100.99"), -100),
                 Arguments.of("Product Name", new BigDecimal("100.99"), 0),
@@ -101,7 +107,7 @@ class ProductServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("AddInvalidProducts")
+    @MethodSource("addInvalidProducts")
     void addProduct_ShouldReturnFail_WhenNameIsEmpty(String name, BigDecimal price, Integer quantity) {
         AddProductDTO invalidProductDTO = new AddProductDTO(name, price, quantity);
         assertThrows(IllegalArgumentException.class, () -> productService.addProduct(invalidProductDTO));
@@ -182,128 +188,71 @@ class ProductServiceTest {
     }
 
     @Test
-    void updateProduct_ShouldReturnSuccess_WhenAllOk(){
-        Product product = new Product(
-                1L,
-                "ProductTestOldName",
-                new BigDecimal("1.99"),
-                10
-        );
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("2.99"),
-                20
-        );
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+    void updateProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(productRepository.existsByName(validUpdateProductDTO.name())).thenReturn(false);
+        when(mapper.toEntityUpdate(any(), any())).thenReturn(validUpdatedEntityProduct);
+        when(productRepository.save(any(Product.class))).thenReturn(validUpdatedEntityProduct);
+        when(mapper.toDTO(any(Product.class))).thenReturn(validResponseUpdatedProductDTO);
 
-        productService.updateProduct(1L, update);
+        ResponseProductDTO result = productService.updateProduct(PRODUCT_ID, validUpdateProductDTO);
 
-        verify(productRepository).save(product);
+        assertThat(result).isEqualTo(validResponseUpdatedProductDTO);
+
+        verify(productRepository, times(1)).findById(any());
+        verify(productRepository, times(1)).save(any());
+        verify(mapper, times(1)).toDTO(any(Product.class));
     }
 
     @Test
-    void updateProduct_ShouldReturnFail_WhenIdIsNull(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("2.99"),
-                20
-        );
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(null, update));
+    void updateProduct_ShouldReturnFail_WhenIdIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(null, validUpdateProductDTO));
+
+        verify(productRepository, never()).findById(any());
+        verify(productRepository, never()).save(any());
+        verify(mapper, never()).toDTO(any(Product.class));
     }
 
     @Test
-    void updateProduct_ShouldReturnFail_WhenIdIsNotFound(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("2.99"),
-                20
-        );
-        assertThrows(ProductNotFoundException.class, () -> productService.updateProduct(1L, update));
+    void updateProduct_ShouldReturnFail_WhenProductExist() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(productRepository.existsByName(validUpdateProductDTO.name())).thenReturn(true);
+
+        assertThrows(ProductExistException.class, () -> productService.updateProduct(PRODUCT_ID, validUpdateProductDTO));
+
+        verify(productRepository, times(1)).findById(any());
+        verify(productRepository, never()).save(any());
+        verify(mapper, never()).toDTO(any(Product.class));
+        verify(mapper, never()).toEntityUpdate(any(), any());
     }
 
-    @Test
-    void updateProduct_ShouldReturnFail_WhenNameIsNull(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                null,
-                new BigDecimal("2.99"),
-                20
-        );
+    static Stream<Arguments> updateInvalidProducts() {
+        return Stream.of(
+                Arguments.of("", new BigDecimal("200.99"), 200),
+                Arguments.of(" ", new BigDecimal("200.99"), 200),
+                Arguments.of(null, new BigDecimal("200.99"), 200),
 
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
+                Arguments.of("Product Name Test", new BigDecimal("-200.99"), 200),
+                Arguments.of("Product Name Test", new BigDecimal("0"), 200),
+                Arguments.of("Product Name Test", null, 200),
+
+                Arguments.of("Product Name Test", new BigDecimal("200.99"), -200),
+                Arguments.of("Product Name Test", new BigDecimal("200.99"), 0),
+                Arguments.of("Product Name Test", new BigDecimal("200.99"), null)
+        );
     }
 
-    @Test
-    void updateProduct_ShouldReturnFail_WhenNameIsEmpty(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "",
-                new BigDecimal("2.99"),
-                20
-        );
+    @ParameterizedTest
+    @MethodSource("updateInvalidProducts")
+    void updateProduct_ShouldReturnIllegalArgumentException(String name, BigDecimal price, Integer quantity) {
+        UpdateProductDTO invalidUpdateProductDTO = new UpdateProductDTO(name, price, quantity);
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(PRODUCT_ID, invalidUpdateProductDTO));
 
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
-    }
-
-    @Test
-    void updateProduct_ShouldReturnFail_WhenPriceIsNull(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                null,
-                20
-        );
-
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
-    }
-
-    @Test
-    void updateProduct_ShouldReturnFail_WhenPriceIsLessThanZero(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("-1.99"),
-                20
-        );
-
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
-    }
-
-    @Test
-    void updateProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("1.99"),
-                -20
-        );
-
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
-    }
-
-    @Test
-    void updateProduct_ShouldReturnFail_WhenQuantityIsNull(){
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("1.99"),
-                null
-        );
-
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(1L, update));
-    }
-
-    @Test
-    void updateProduct_ShouldReturnFail_WhenProductsExists(){
-        Product product = new Product(
-                1L,
-                "ProductTestOldName",
-                new BigDecimal("1.99"),
-                10
-        );
-        UpdateProductDTO update = new UpdateProductDTO(
-                "ProductTestNewName",
-                new BigDecimal("2.99"),
-                20
-        );
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.existsByName(update.name())).thenReturn(true);
-
-        assertThrows(ProductExistException.class, () -> productService.updateProduct(1L, update));
+        verify(productRepository, never()).findById(any());
+        verify(productRepository, never()).existsByName(any());
+        verify(productRepository, never()).save(any());
+        verify(mapper, never()).toEntityUpdate(any(), any());
+        verify(mapper, never()).toDTO(any());
     }
 
     @Test
