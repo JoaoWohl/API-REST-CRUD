@@ -24,11 +24,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -48,7 +47,7 @@ class ProductServiceTest {
     private Product validEntityProduct;
     private AddProductDTO validAddProductDTO;
     private ResponseProductDTO validResponseProductDTO;
-    private List<Product> ProductList;
+    private List<Product> productList;
     private final UUID PRODUCT_ID = UUID.randomUUID();
 
     @BeforeEach
@@ -56,6 +55,7 @@ class ProductServiceTest {
         validAddProductDTO = new AddProductDTO("Product Name", new BigDecimal("100.99"), 100);
         validEntityProduct = new Product(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 100);
         validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 100);
+        productList = List.of(validEntityProduct);
     }
 
     @Test
@@ -112,25 +112,24 @@ class ProductServiceTest {
 
     @Test
     void findAll_ShouldReturnSuccess_WhenAllOk() {
-        Product product = new Product(
-                1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10);
-        List<Product> products = List.of(validEntityProduct);
-
-        ResponseProductDTO dto = new ResponseProductDTO(1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10);
-        List<ResponseProductDTO> dtos = List.of(dto);
-
-        when(mapper.toDTO(product)).thenReturn(dto);
-        when(productRepository.findAll()).thenReturn(products);
+        when(productRepository.findAll()).thenReturn(productList);
+        when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
         List<ResponseProductDTO> result = productService.findAll();
 
-        assertEquals(dtos, result);
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().id()).isEqualTo(PRODUCT_ID);
+
+        verify(productRepository, times(1)).findAll();
+    }
+
+    @Test
+    void findAll_ShouldReturnProductNotFoundException_WhenDontHaveProducts() {
+        when(productRepository.findAll()).thenReturn(Collections.emptyList());
+
+        assertThrows(ProductNotFoundException.class, () -> productService.findAll());
+
+        verify(productRepository, times(1)).findAll();
     }
 
     @Test
