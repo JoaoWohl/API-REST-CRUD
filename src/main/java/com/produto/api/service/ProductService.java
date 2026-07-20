@@ -56,16 +56,16 @@ public class ProductService {
 
     public ResponseProductDTO updateProduct(UUID id, UpdateProductDTO updatedProduct) {
         if (id == null) throw new IllegalArgumentException();
-        if (updatedProduct.name() == null || updatedProduct.name().isEmpty()) throw new IllegalArgumentException();
-        if (updatedProduct.quantity() == null || updatedProduct.quantity() < 0) throw new IllegalArgumentException();
-        if (updatedProduct.price() == null || updatedProduct.price().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException();
-        if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
-        if (repository.existsByName(updatedProduct.name())) throw new ProductExistException();
-
-        Product produto = repository.findById(id).get();
-        mapper.toEntityUpdate(updatedProduct, produto);
-        repository.save(produto);
-        return mapper.toDTO(produto);
+        if (updatedProduct.name() == null || updatedProduct.name().isBlank()) throw new IllegalArgumentException();
+        if (updatedProduct.quantity() == null || updatedProduct.quantity() <= 0) throw new IllegalArgumentException();
+        if (updatedProduct.price() == null || updatedProduct.price().compareTo(BigDecimal.ZERO) <= 0 ) throw new IllegalArgumentException();
+        Product product = repository.findById(id).orElseThrow(() ->  new ProductNotFoundException("Product with id " + id + " not found"));
+        if (!product.getName().equals(updatedProduct.name())) {
+            if (repository.existsByName(updatedProduct.name()))  throw new ProductExistException();
+        }
+        mapper.toEntityUpdate(updatedProduct, product);
+        repository.save(product);
+        return mapper.toDTO(product);
     }
 
     public ResponseProductDTO withdrawProduct(UUID id, WithdrawOrPutProductDTO withdrawProduct) {
