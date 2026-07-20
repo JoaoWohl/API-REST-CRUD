@@ -51,7 +51,7 @@ public class ProductService {
         if (id == null) throw new IllegalArgumentException();
         Product product = repository.findById(id).orElseThrow(() ->  new ProductNotFoundException("Product with id " + id + " not found"));
         repository.delete(product);
-        return  mapper.toDTO(product);
+        return mapper.toDTO(product);
     }
 
     public ResponseProductDTO updateProduct(UUID id, UpdateProductDTO updatedProduct) {
