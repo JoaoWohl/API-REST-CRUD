@@ -133,25 +133,14 @@ class ProductServiceTest {
     }
 
     @Test
-    void findById_ShouldReturnSuccess_WhenIdOk() {
-        Product product = new Product(
-              1L,
-              "ProductTest",
-              new BigDecimal("1.99"),
-              10);
+    void findById_ShouldReturnSuccess_WhenEverythingIsOk() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-        ResponseProductDTO dto = new ResponseProductDTO(
-                1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10);
+        ResponseProductDTO result = productService.findById(PRODUCT_ID);
 
-        when(mapper.toDTO(product)).thenReturn(dto);
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-
-        ResponseProductDTO result = productService.findById(1L);
-
-        assertEquals(dto, result);
+        assertThat(result).isEqualTo(validResponseProductDTO);
+        verify(productRepository, times(1)).findById(any());
     }
 
     @Test
@@ -161,7 +150,7 @@ class ProductServiceTest {
 
     @Test
     void findById_ShouldReturnFail_WhenIdNotFound() {
-        assertThrows(ProductNotFoundException.class, () -> productService.findById(1L));
+        assertThrows(ProductNotFoundException.class, () -> productService.findById(UUID.randomUUID()));
     }
 
     @Test
