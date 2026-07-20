@@ -70,13 +70,12 @@ public class ProductService {
 
     public ResponseProductDTO withdrawProduct(UUID id, WithdrawOrPutProductDTO withdrawProduct) {
         if (id == null) throw new IllegalArgumentException();
-        if (withdrawProduct.quantity() == null || withdrawProduct.quantity() < 0) throw new IllegalArgumentException();
-        if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
-        Product produto = repository.findById(id).get();
-        if (produto.getQuantity() < withdrawProduct.quantity()) throw new NotEnoghProductException("Not enough products in stock");
-        produto.setQuantity(produto.getQuantity()-withdrawProduct.quantity());
-        repository.save(produto);
-        return mapper.toDTO(produto);
+        if (withdrawProduct.quantity() == null || withdrawProduct.quantity() <= 0) throw new IllegalArgumentException();
+        Product product = repository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
+        if (product.getQuantity() < withdrawProduct.quantity()) throw new NotEnoghProductException("Not enough products in stock");
+        product.setQuantity(product.getQuantity()-withdrawProduct.quantity());
+        repository.save(product);
+        return mapper.toDTO(product);
     }
 
     public ResponseProductDTO putProduct(UUID id, @Valid WithdrawOrPutProductDTO putProduct) {
