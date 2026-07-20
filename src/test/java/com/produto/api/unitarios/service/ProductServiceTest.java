@@ -305,51 +305,36 @@ class ProductServiceTest {
     }
 
     @Test
-    void putProduct_ShouldReturnSuccess_WhenAllOk(){
-        Product product = new Product(
-                1L,
-                "ProductTest",
-                new BigDecimal("1.99"),
-                10
-        );
-        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(1);
+    void putProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
+        ResponseProductDTO putProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 110);
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(mapper.toDTO(any(Product.class))).thenReturn(putProductResponseDTO);
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        ResponseProductDTO result = productService.putProduct(PRODUCT_ID, withdrawOrPutProductDTO);
 
-        productService.putProduct(1L,putProduct);
+        assertThat(result).isEqualTo(putProductResponseDTO);
 
-        verify(productRepository).save(argThat(p ->
-                p.getId() == 1L
-                && p.getName().equals("ProductTest")
-                && p.getPrice().equals(new BigDecimal("1.99"))
-                && p.getQuantity() == 11
-        ));
+        verify(productRepository, times(1)).findById(PRODUCT_ID);
+        verify(productRepository, times(1)).save(any());
+        verify(mapper, times(1)).toDTO(any(Product.class));
     }
 
     @Test
-    void putProduct_ShouldReturnFail_WhenIdIsNull(){
-        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(1);
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(null, putProduct));
+    void putProduct_ShouldReturnFail_WhenIdIsNull() {
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(null, withdrawOrPutProductDTO));
     }
 
     @Test
-    void putProduct_ShouldReturnFail_WhenIdNotFound(){
-        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(1);
-        assertThrows(ProductNotFoundException.class, () -> productService.putProduct(1L, putProduct));
+    void putProduct_ShouldReturnFail_WhenProductIsNotFound() {
+        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
+        assertThrows(ProductNotFoundException.class, () -> productService.putProduct(PRODUCT_ID, withdrawOrPutProductDTO));
     }
 
-    @Test
-    void putProduct_ShouldReturnFail_WhenQuantityIsLessThanZero(){
-        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(-1);
-
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(1L, putProduct));
-    }
-
-    @Test
-    void putProduct_ShouldReturnFail_WhenQuantityIsNull(){
-        WithdrawOrPutProductDTO putProduct = new WithdrawOrPutProductDTO(null);
-
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(1L, putProduct));
+    @ParameterizedTest
+    @MethodSource("withdrawOrPutInvalidProducts")
+    void putProduct_ShouldReturnIllegalArgumentExceptions(int quantity) {
+        WithdrawOrPutProductDTO invalidPutProductDTO = new WithdrawOrPutProductDTO(quantity);
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(PRODUCT_ID, invalidPutProductDTO));
     }
 
 }
