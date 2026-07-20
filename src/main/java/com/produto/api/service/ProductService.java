@@ -80,11 +80,10 @@ public class ProductService {
 
     public ResponseProductDTO putProduct(UUID id, @Valid WithdrawOrPutProductDTO putProduct) {
         if (id == null) throw new IllegalArgumentException();
-        if (putProduct.quantity() == null || putProduct.quantity() < 0) throw new IllegalArgumentException();
-        if (repository.findById(id).isEmpty()) throw new ProductNotFoundException("Product with id " + id + " not found");
-        Product produto = repository.findById(id).get();
-        produto.setQuantity(produto.getQuantity()+putProduct.quantity());
-        repository.save(produto);
-        return mapper.toDTO(produto);
+        if (putProduct.quantity() == null || putProduct.quantity() <= 0) throw new IllegalArgumentException();
+        Product product = repository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
+        product.setQuantity(product.getQuantity()+putProduct.quantity());
+        repository.save(product);
+        return mapper.toDTO(product);
     }
 }
