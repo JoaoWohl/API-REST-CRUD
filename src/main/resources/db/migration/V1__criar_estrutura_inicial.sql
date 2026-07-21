@@ -12,5 +12,7 @@ CREATE TABLE products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     price NUMERIC(38, 2) NOT NULL,
-    quantity INT NOT NULL
+    quantity INT NOT NULL,
+    user_id UUID NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );

@@ -1,5 +1,6 @@
 package com.produto.api.entity;
 
+import com.produto.api.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,4 +29,8 @@ public class Product {
 
     @Column(nullable = false, name = "quantity")
     private Integer quantity;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

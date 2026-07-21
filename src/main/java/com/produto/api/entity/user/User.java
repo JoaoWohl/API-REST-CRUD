@@ -1,5 +1,6 @@
 package com.produto.api.entity.user;
 
+import com.produto.api.entity.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,13 +24,20 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false, unique = true)
     private String login;
+
     @Column(nullable = false)
     private String password;
+
     private UserRole role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Product> products;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
