@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,29 +25,29 @@ class JwtTokenServiceTest {
     @InjectMocks
     private JwtTokenService jwtTokenService;
 
+    private User validUser;
+    private static final UUID USER_ID = UUID.randomUUID();
+
     @BeforeEach
     void setup() {
+        validUser = new User(USER_ID, "User Name", "testlogin@example.com", "TestPassword",UserRole.USER);
         ReflectionTestUtils.setField(jwtTokenService, "secret", "test-secret-key");
     }
 
     @Test
     void generateToken_ShouldReturnToken_WhenUserIsValid() {
-        User user = new User("id-1", "TestName", "TestEmail@test.com", "TestPassword", UserRole.USER);
-
-        String token = jwtTokenService.generateToken(user);
-
+        String token = jwtTokenService.generateToken(validUser);
         assertNotNull(token);
     }
 
     @Test
     void validateToken_ShouldReturnUserData_WhenTokenIsValid() {
-        User user = new User("id-1", "TestName", "TestEmail@test.com", "TestPassword", UserRole.USER);
-        String token = jwtTokenService.generateToken(user);
+        String token = jwtTokenService.generateToken(validUser);
 
         Optional<JWTUserData> result = jwtTokenService.validateToken(token);
 
         assertTrue(result.isPresent());
-        assertEquals("id-1", result.get().userId());
+        assertEquals(USER_ID, result.get().userId());
     }
 
     @Test
@@ -61,7 +62,7 @@ class JwtTokenServiceTest {
         // Gera com secret diferente
         Algorithm wrongAlgorithm = Algorithm.HMAC256("secret-errado");
         String token = JWT.create()
-                .withSubject("id-1")
+                .withSubject(USER_ID.toString())
                 .withExpiresAt(Instant.now().plusSeconds(8000))
                 .sign(wrongAlgorithm);
 
