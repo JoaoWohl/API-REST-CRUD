@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<Product, UUID> {
-    boolean existsByName(@NotEmpty String name);
     boolean existsByUserIdAndName(@NotEmpty UUID UserId, @NotEmpty String name);
     List<Product> findAllByUserId(@NotEmpty UUID UserId);
     Optional<Product> findByUserIdAndId(@NotEmpty UUID UserId, @NotEmpty UUID id);

@@ -4,7 +4,6 @@ import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
-import com.produto.api.entity.Product;
 import com.produto.api.exception.ErrorResponse;
 import com.produto.api.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
