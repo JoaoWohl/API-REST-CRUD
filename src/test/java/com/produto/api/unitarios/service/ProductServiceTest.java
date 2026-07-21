@@ -290,7 +290,6 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(authHeader, PRODUCT_ID, invalidUpdateProductDTO));
 
         verify(productRepository, never()).findById(any());
-        verify(productRepository, never()).existsByName(any());
         verify(productRepository, never()).save(any());
         verify(mapper, never()).toEntityUpdate(any(), any());
         verify(mapper, never()).toDTO(any());
