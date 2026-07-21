@@ -12,8 +12,12 @@ import com.produto.api.entity.user.UserRole;
 import com.produto.api.exception.auth.UserExistException;
 import com.produto.api.repository.UserRepository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,6 +26,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,66 +49,54 @@ class AuthServiceTest {
     @InjectMocks
     AuthService authService;
 
+    private User validUser;
+    private LoginRequestDTO validLoginRequestDTO;
+    private final static UUID USER_ID = UUID.randomUUID();
+
+    @BeforeEach
+    void setUp() {
+        validUser = new User(USER_ID, "User Name", "testlogin@example.com", "TestPassword",UserRole.USER);
+        validLoginRequestDTO = new LoginRequestDTO("testlogin@example.com", "TestPassword");
+    }
+
     @Test
     void login_ShouldReturnSuccess_WhenEverythingOkay() {
-        User user = new User("id-1","TestName","TestEmail@test.com","TestPassword",UserRole.USER);
-        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestPassword");
-
         Authentication authentication = mock(Authentication.class);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
-        when(authentication.getPrincipal()).thenReturn(user);
+        when(authentication.getPrincipal()).thenReturn(validUser);
 
-        when(tokenConfig.generateToken(user)).thenReturn("jwt-token");
+        when(tokenConfig.generateToken(validUser)).thenReturn("jwt-token");
 
-        LoginResponseDTO response = authService.login(request);
+        LoginResponseDTO response = authService.login(validLoginRequestDTO);
 
         assertEquals("jwt-token",response.token());
+        verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
     }
 
     @Test
     void login_ShouldReturnFail_WhenPasswordIsWrong() {
-        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","TestWrongPassword");
-
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenThrow(new BadCredentialsException("Bad credentials"));
 
-        assertThrows(EmailOrPasswordWrongException.class, () -> authService.login(request));
+        assertThrows(EmailOrPasswordWrongException.class, () -> authService.login(validLoginRequestDTO));
         verify(tokenConfig, never()).generateToken(any());
     }
 
-    @Test
-    void login_ShouldReturnFail_WhenPasswordIsNull(){
-        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com",null);
-        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    static Stream<Arguments> invalidLoginRequestDTO() {
+        return Stream.of(
+                Arguments.of("", "TestPassword"),
+                Arguments.of(" ", "TestPassword"),
+                Arguments.of(null, "TestPassword"),
+                Arguments.of("testlogin@example.com", ""),
+                Arguments.of("testlogin@example.com", " "),
+                Arguments.of("testlogin@example.com", null)
+        );
     }
 
-    @Test
-    void login_ShouldReturnFail_WhenPasswordIsEmpty(){
-        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com","");
-        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
-    }
-
-    @Test
-    void login_ShouldReturnFail_WhenPasswordIsBlank(){
-        LoginRequestDTO request = new LoginRequestDTO("TestEmail@test.com"," ");
-        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
-    }
-
-    @Test
-    void login_ShouldReturnFail_WhenLoginIsNull(){
-        LoginRequestDTO request = new LoginRequestDTO(null,"TestPassword");
-        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
-    }
-
-    @Test
-    void login_ShouldReturnFail_WhenLoginIsEmpty(){
-        LoginRequestDTO request = new LoginRequestDTO("","TestPassword");
-        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
-    }
-
-    @Test
-    void login_ShouldReturnFail_WhenLoginIsBlank(){
-        LoginRequestDTO request = new LoginRequestDTO(" ","TestPassword");
-        assertThrows(IllegalArgumentException.class,() -> authService.login(request));
+    @ParameterizedTest
+    @MethodSource("invalidLoginRequestDTO")
+    void login_ShouldReturnIllegalArgumentsException_WhenInvalidLoginRequestDTO(String login, String password) {
+        LoginRequestDTO invalidLoginRequestDTO = new LoginRequestDTO(login, password);
+        assertThrows(IllegalArgumentException.class, () -> authService.login(invalidLoginRequestDTO));
     }
 
     @Test
