@@ -153,11 +153,11 @@ class ProductServiceTest {
     @Test
     void findAll_ShouldReturnProductNotFoundException_WhenNotHaveProducts() {
         when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
-        when(productRepository.findAll()).thenReturn(Collections.emptyList());
+        when(productRepository.findAllByUserId(USER_ID)).thenReturn(Collections.emptyList());
 
         assertThrows(ProductNotFoundException.class, () -> productService.findAll(authHeader));
 
-        verify(productRepository, times(1)).findAll();
+        verify(productRepository, times(1)).findAllByUserId(any());
     }
 
     @Test
@@ -212,7 +212,8 @@ class ProductServiceTest {
 
     @Test
     void deleteProduct_ShouldReturnFail_WhenIdIsNotFound() {
-        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.empty());
+        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
+        when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.empty());
 
         assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(authHeader, PRODUCT_ID));
 
@@ -347,14 +348,15 @@ class ProductServiceTest {
     @Test
     void putProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
         ResponseProductDTO putProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 110);
-        when(productRepository.findById(PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
+        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
+        when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(mapper.toDTO(any(Product.class))).thenReturn(putProductResponseDTO);
 
         ResponseProductDTO result = productService.putProduct(authHeader, PRODUCT_ID, withdrawOrPutProductDTO);
 
         assertThat(result).isEqualTo(putProductResponseDTO);
 
-        verify(productRepository, times(1)).findById(PRODUCT_ID);
+        verify(productRepository, times(1)).findByUserIdAndId(any(), any());
         verify(productRepository, times(1)).save(any());
         verify(mapper, times(1)).toDTO(any(Product.class));
     }
