@@ -30,8 +30,8 @@ public class AuthService {
     private JwtTokenService tokenConfig;
 
     public LoginResponseDTO login(LoginRequestDTO request){
-        if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
-        if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
+        if (request.login() == null || request.login().isBlank()) throw new IllegalArgumentException();
+        if (request.password() == null || request.password().isBlank()) throw new IllegalArgumentException();
 
         try {
             UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(), request.password());

@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,7 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void loadUserByUsername_ShouldReturnSuccess_WhenEverythingOk() {
-        User user = new User("id-1","TestName","TestEmail@test.com","TestPassword", UserRole.USER);
+        User user = new User(UUID.randomUUID(),"TestName","TestEmail@test.com","TestPassword", UserRole.USER);
         String login = "TestEmail@test.com";
 
         when(repository.findByLogin(login)).thenReturn(Optional.of(user));

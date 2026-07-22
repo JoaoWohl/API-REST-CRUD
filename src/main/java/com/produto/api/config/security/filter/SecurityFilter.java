@@ -3,11 +3,11 @@ package com.produto.api.config.security.filter;
 import com.produto.api.config.security.jwt.JWTUserData;
 import com.produto.api.repository.UserRepository;
 import com.produto.api.service.security.JwtTokenService;
+import com.produto.api.utils.TokenUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,22 +24,21 @@ public class SecurityFilter extends OncePerRequestFilter {
     private JwtTokenService tokenConfig;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TokenUtils tokenUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        if (Strings.isNotEmpty(authHeader) && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring("Bearer ".length());
-            Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
-            if(optUser.isPresent()){
-                JWTUserData userData = optUser.get();
-                UserDetails userDetails = userRepository.findById(userData.userId()).orElseThrow();
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userData, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-            filterChain.doFilter(request,response);
-        } else {
-            filterChain.doFilter(request, response);
+        String token = tokenUtils.getToken(authHeader);
+
+        Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
+        if(optUser.isPresent()){
+            JWTUserData userData = optUser.get();
+            UserDetails userDetails = userRepository.findById(userData.userId()).orElseThrow();
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userData, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
+        filterChain.doFilter(request,response);
     }
 }

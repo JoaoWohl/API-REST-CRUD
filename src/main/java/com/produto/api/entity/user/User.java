@@ -1,34 +1,46 @@
 package com.produto.api.entity.user;
 
+import com.produto.api.entity.Product;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Table(name="users")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @NonNull
+    private UUID id;
+
+    @NonNull
     @Column(nullable = false)
     private String name;
+
+    @NonNull
     @Column(nullable = false, unique = true)
     private String login;
+
+    @NonNull
     @Column(nullable = false)
     private String password;
+
+    @NonNull
     private UserRole role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Product> products = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -40,7 +52,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return "";
+        return this.login;
     }
 
     @Override
