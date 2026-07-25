@@ -78,6 +78,14 @@ class ProductServiceTest {
         productList = List.of(validEntityProduct);
     }
 
+    static Stream<Arguments> invalidAuthHeaders() {
+        return Stream.of(
+                Arguments.of(""),
+                Arguments.of((Object) null),
+                Arguments.of(" ")
+        );
+    }
+
     @Test
     @DisplayName("Deve retornar successo quando tudo está correto")
     void addProduct_ShouldReturnSuccess() {
@@ -136,6 +144,12 @@ class ProductServiceTest {
         verify(productRepository, never()).save(any(Product.class));
     }
 
+    @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void addProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(invalidAuthHeader, validAddProductDTO));
+    }
+
     @Test
     void findAll_ShouldReturnSuccess_WhenAllOk() {
         when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
@@ -160,6 +174,12 @@ class ProductServiceTest {
         verify(productRepository, times(1)).findAllByUserId(any());
     }
 
+    @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void findAll_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.findAll(invalidAuthHeader));
+    }
+
     @Test
     void findById_ShouldReturnSuccess_WhenEverythingIsOk() {
         when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
@@ -173,21 +193,6 @@ class ProductServiceTest {
     }
 
     @Test
-    void findById_ShouldReturnFail_WhenAuthHeaderIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> productService.findById(null, PRODUCT_ID));
-    }
-
-    @Test
-    void findById_ShouldReturnFail_WhenAuthHeaderIsBlank() {
-        assertThrows(IllegalArgumentException.class, () -> productService.findById(" ", PRODUCT_ID));
-    }
-
-    @Test
-    void findById_ShouldReturnFail_WhenAuthHeaderIsEmpty() {
-        assertThrows(IllegalArgumentException.class, () -> productService.findById("", PRODUCT_ID));
-    }
-
-    @Test
     void findById_ShouldReturnFail_WhenProductIdIsNull() {
         assertThrows(IllegalArgumentException.class, () -> productService.findById(authHeader, null));
     }
@@ -195,6 +200,12 @@ class ProductServiceTest {
     @Test
     void findById_ShouldReturnFail_WhenIdNotFound() {
         assertThrows(ProductNotFoundException.class, () -> productService.findById(authHeader, PRODUCT_ID));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void findById_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.findById(invalidAuthHeader, PRODUCT_ID));
     }
 
     @Test
@@ -225,6 +236,12 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(authHeader, null));
 
         verify(productRepository, never()).deleteById(any());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void deleteProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(invalidAuthHeader, PRODUCT_ID));
     }
 
     @Test
@@ -266,6 +283,12 @@ class ProductServiceTest {
         verify(productRepository, never()).save(any());
         verify(mapper, never()).toDTO(any(Product.class));
         verify(mapper, never()).toEntityUpdate(any(), any());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void updateProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(invalidAuthHeader, PRODUCT_ID, validUpdateProductDTO));
     }
 
     static Stream<Arguments> updateInvalidProducts() {
@@ -331,16 +354,23 @@ class ProductServiceTest {
         assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(authHeader, PRODUCT_ID, bigWithdrawOrPutProductDTO));
     }
 
+    @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void withdrawProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(invalidAuthHeader, PRODUCT_ID, withdrawOrPutProductDTO));
+    }
+
     static Stream<Arguments> withdrawOrPutInvalidProducts() {
         return Stream.of(
                 Arguments.of(0),
+                Arguments.of((Object) null),
                 Arguments.of(-10)
         );
     }
 
     @ParameterizedTest
     @MethodSource("withdrawOrPutInvalidProducts")
-    void withdrawProduct_ShouldReturnIllegalArgumentExceptions(int quantity) {
+    void withdrawProduct_ShouldReturnIllegalArgumentExceptions(Integer quantity) {
         WithdrawOrPutProductDTO invalidWithdrawProductDTO = new WithdrawOrPutProductDTO(quantity);
         assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(authHeader, PRODUCT_ID, invalidWithdrawProductDTO));
     }
@@ -374,8 +404,14 @@ class ProductServiceTest {
     }
 
     @ParameterizedTest
+    @MethodSource("invalidAuthHeaders")
+    void putProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(invalidAuthHeader, PRODUCT_ID, withdrawOrPutProductDTO));
+    }
+
+    @ParameterizedTest
     @MethodSource("withdrawOrPutInvalidProducts")
-    void putProduct_ShouldReturnIllegalArgumentExceptions(int quantity) {
+    void putProduct_ShouldReturnIllegalArgumentExceptions(Integer quantity) {
         WithdrawOrPutProductDTO invalidPutProductDTO = new WithdrawOrPutProductDTO(quantity);
         assertThrows(IllegalArgumentException.class, () -> productService.putProduct(authHeader, PRODUCT_ID, invalidPutProductDTO));
     }
