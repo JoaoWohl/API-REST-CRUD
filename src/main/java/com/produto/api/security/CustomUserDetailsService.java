@@ -1,4 +1,4 @@
-package com.produto.api.service.security;
+package com.produto.api.security;
 
 
 import com.produto.api.repository.UserRepository;
@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    UserRepository repository;
+    UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
-        return repository.findByLogin(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return userRepository.findByLogin(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
 }

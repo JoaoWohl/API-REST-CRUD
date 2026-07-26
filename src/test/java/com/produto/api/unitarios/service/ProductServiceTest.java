@@ -14,7 +14,7 @@ import com.produto.api.mapper.ProductMapper;
 import com.produto.api.repository.ProductRepository;
 import com.produto.api.repository.UserRepository;
 import com.produto.api.service.ProductService;
-import com.produto.api.utils.TokenUtils;
+import com.produto.api.security.TokenUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

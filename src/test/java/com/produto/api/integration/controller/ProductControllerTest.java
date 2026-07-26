@@ -10,7 +10,7 @@ import com.produto.api.entity.user.UserRole;
 import com.produto.api.integration.BaseIntegrationTest;
 import com.produto.api.repository.ProductRepository;
 import com.produto.api.repository.UserRepository;
-import com.produto.api.service.security.JwtTokenService;
+import com.produto.api.security.JwtTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

@@ -1,6 +1,6 @@
 package com.produto.api.config.security;
 
-import com.produto.api.config.security.filter.SecurityFilter;
+import com.produto.api.security.SecurityFilter;
 import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

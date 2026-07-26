@@ -1,7 +1,7 @@
 package com.produto.api.service;
 
 import com.produto.api.exception.auth.EmailOrPasswordWrongException;
-import com.produto.api.service.security.JwtTokenService;
+import com.produto.api.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;

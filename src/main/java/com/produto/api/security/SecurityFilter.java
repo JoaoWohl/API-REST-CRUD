@@ -1,9 +1,6 @@
-package com.produto.api.config.security.filter;
+package com.produto.api.security;
 
-import com.produto.api.config.security.jwt.JWTUserData;
 import com.produto.api.repository.UserRepository;
-import com.produto.api.service.security.JwtTokenService;
-import com.produto.api.utils.TokenUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

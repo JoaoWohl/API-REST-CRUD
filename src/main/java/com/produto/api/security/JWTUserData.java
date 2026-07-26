@@ -1,4 +1,4 @@
-package com.produto.api.config.security.jwt;
+package com.produto.api.security;
 
 import lombok.Builder;
 
