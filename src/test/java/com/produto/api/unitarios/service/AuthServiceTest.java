@@ -118,12 +118,12 @@ class AuthServiceTest {
     @Test
     void register_ShouldReturnSuccess_WhenUserRoleIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",null);
-        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+        when(userRepository.existsByLogin(request.login().toLowerCase())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
 
         RegisterUserResponseDTO result = authService.register(request);
 
-        assertEquals(new RegisterUserResponseDTO("TestName","TestEmail@test.com"),result);
+        assertThat(result).isEqualTo(new RegisterUserResponseDTO("TestName","testemail@test.com"));
         verify(userRepository, times(1)).existsByLogin(anyString());
         verify(encoder, times(1)).encode(anyString());
         verify(userRepository, times(1)).save(any(User.class));
@@ -160,15 +160,15 @@ class AuthServiceTest {
     @Test
     void registerAdmin_ShouldReturnSuccess_WhenEverythingOkay(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",UserRole.ADMIN);
-        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+        when(userRepository.existsByLogin(request.login().toLowerCase())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
 
         RegisterUserResponseDTO result = authService.registerAdmin(request);
 
-        assertEquals(new RegisterUserResponseDTO("TestName","TestEmail@test.com"), result);
+        assertEquals(new RegisterUserResponseDTO("TestName","testemail@test.com"), result);
         verify(userRepository).save(argThat(u ->
                 u.getName().equals("TestName")
-                && u.getLogin().equals(request.login())
+                && u.getLogin().equals(request.login().toLowerCase())
                 && u.getPassword().equals("EncodedPassword")
                 && u.getRole().equals(UserRole.ADMIN)
         ));
@@ -177,15 +177,15 @@ class AuthServiceTest {
     @Test
     void registerAdmin_ShouldReturnSuccess_WhenRoleIsNull(){
         RegisterUserRequestDTO request = new RegisterUserRequestDTO("TestName","TestEmail@test.com","TestPassword",null);
-        when(userRepository.existsByLogin(request.login())).thenReturn(false);
+        when(userRepository.existsByLogin(request.login().toLowerCase())).thenReturn(false);
         when(encoder.encode(request.password())).thenReturn("EncodedPassword");
 
         RegisterUserResponseDTO result = authService.registerAdmin(request);
 
-        assertEquals(new RegisterUserResponseDTO("TestName","TestEmail@test.com"), result);
+        assertEquals(new RegisterUserResponseDTO("TestName","testemail@test.com"), result);
         verify(userRepository).save(argThat(u ->
                 u.getName().equals("TestName")
-                && u.getLogin().equals(request.login())
+                && u.getLogin().equals(request.login().toLowerCase())
                 && u.getPassword().equals("EncodedPassword")
                 && u.getRole().equals(UserRole.USER)
         ));
