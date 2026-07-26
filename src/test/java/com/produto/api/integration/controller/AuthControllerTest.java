@@ -47,7 +47,7 @@ public class AuthControllerTest extends BaseIntegrationTest {
     @Test
     void login_ShouldReturnOk() throws Exception {
         User user = new User();
-        user.setLogin("loginTest@test.com");
+        user.setLogin("logintest@test.com");
         user.setPassword(bCryptPasswordEncoder.encode("testPassword"));
         user.setName("testName");
         user.setRole(UserRole.USER);
@@ -98,13 +98,13 @@ public class AuthControllerTest extends BaseIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("testName"))
-                .andExpect(jsonPath("$.login").value("testEmail@test.com"));
+                .andExpect(jsonPath("$.login").value("testemail@test.com"));
     }
 
     @Test
     void register_ShouldReturnConflictError() throws Exception {
         User user = new User();
-        user.setLogin("testEmail@test.com");
+        user.setLogin("testemail@test.com");
         user.setPassword(bCryptPasswordEncoder.encode("testPassword"));
         user.setName("testName");
         user.setRole(UserRole.USER);
@@ -142,7 +142,7 @@ public class AuthControllerTest extends BaseIntegrationTest {
     void adminRegister_ShouldReturnConflictError() throws Exception {
         User user = new User();
         user.setName("testName");
-        user.setLogin("testEmail@test.com");
+        user.setLogin("testemail@test.com");
         user.setPassword(bCryptPasswordEncoder.encode("testPassword"));
         user.setRole(UserRole.ADMIN);
         userRepository.save(user);

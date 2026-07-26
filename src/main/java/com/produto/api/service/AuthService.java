@@ -34,7 +34,7 @@ public class AuthService {
         if (request.password() == null || request.password().isBlank()) throw new IllegalArgumentException();
 
         try {
-            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login(), request.password());
+            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.login().toLowerCase(), request.password());
             Authentication authentication = authenticationManager.authenticate(userAndPass);
 
             User user = (User) authentication.getPrincipal();
@@ -47,14 +47,14 @@ public class AuthService {
     }
 
     public RegisterUserResponseDTO register(RegisterUserRequestDTO request){
-        if (repository.existsByLogin(request.login())) throw new UserExistException("Usuário Já cadastrado");
+        if (request.login() == null || request.login().isEmpty() || request.login().isBlank())throw new IllegalArgumentException();
         if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
         if (request.password() == null || request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
-        if (request.login() == null || request.login().isEmpty() || request.login().isBlank())throw new IllegalArgumentException();
+        if (repository.existsByLogin(request.login().toLowerCase())) throw new UserExistException("Usuário Já cadastrado");
 
         User newUser = new User();
         newUser.setName(request.name());
-        newUser.setLogin(request.login());
+        newUser.setLogin(request.login().toLowerCase());
         newUser.setPassword(encoder.encode(request.password()));
         newUser.setRole(UserRole.USER);
 
@@ -64,14 +64,14 @@ public class AuthService {
     }
 
     public RegisterUserResponseDTO registerAdmin(RegisterUserRequestDTO request){
-        if (repository.existsByLogin(request.login())) throw new UserExistException("Usuário Já Cadastrado");
-        if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
-        if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
         if (request.password() == null ||request.password().isEmpty() || request.password().isBlank()) throw new IllegalArgumentException();
+        if (request.login() == null || request.login().isEmpty() || request.login().isBlank()) throw new IllegalArgumentException();
+        if (request.name() == null || request.name().isEmpty() || request.name().isBlank()) throw new IllegalArgumentException();
+        if (repository.existsByLogin(request.login().toLowerCase())) throw new UserExistException("Usuário Já Cadastrado");
 
         User newUser = new User();
         newUser.setName(request.name());
-        newUser.setLogin(request.login());
+        newUser.setLogin(request.login().toLowerCase());
         newUser.setPassword(encoder.encode(request.password()));
         newUser.setRole(request.role());
 
