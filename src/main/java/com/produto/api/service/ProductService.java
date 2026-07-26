@@ -12,7 +12,7 @@ import com.produto.api.mapper.ProductMapper;
 import com.produto.api.entity.Product;
 import com.produto.api.repository.ProductRepository;
 import com.produto.api.repository.UserRepository;
-import com.produto.api.utils.TokenUtils;
+import com.produto.api.security.TokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

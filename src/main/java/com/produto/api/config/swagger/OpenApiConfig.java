@@ -1,4 +1,4 @@
-package com.produto.api.config.security.swagger;
+package com.produto.api.config.swagger;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

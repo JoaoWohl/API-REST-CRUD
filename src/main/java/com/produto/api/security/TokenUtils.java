@@ -1,7 +1,5 @@
-package com.produto.api.utils;
+package com.produto.api.security;
 
-import com.produto.api.config.security.jwt.JWTUserData;
-import com.produto.api.service.security.JwtTokenService;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

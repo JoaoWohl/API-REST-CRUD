@@ -37,6 +37,7 @@ public class User implements UserDetails {
     private String password;
 
     @NonNull
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     @OneToMany(mappedBy = "user")

@@ -1,10 +1,9 @@
-package com.produto.api.service.security;
+package com.produto.api.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.produto.api.config.security.jwt.JWTUserData;
 import com.produto.api.entity.user.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
