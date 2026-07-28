@@ -35,7 +35,10 @@ public class ProductController {
             @ApiResponse(responseCode = "201", description = "Produto Adicionado")
     })
     @PostMapping
-    public ResponseEntity<ResponseProductDTO> addProduct(@AuthenticationPrincipal User userDetails ,@RequestBody @Valid AddProductDTO product){
+    public ResponseEntity<ResponseProductDTO> addProduct(
+            @AuthenticationPrincipal User userDetails,
+            @RequestBody @Valid AddProductDTO product)
+    {
         ResponseProductDTO response = service.addProduct(userDetails.getId(), product);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -47,8 +50,8 @@ public class ProductController {
     })
     @GetMapping
     public ResponseEntity<List<ResponseProductDTO>> getAllProducts(
-            @AuthenticationPrincipal User userDetails
-    ){
+            @AuthenticationPrincipal User userDetails)
+    {
         return ResponseEntity.ok(service.findAll(userDetails.getId()));
     }
 
@@ -58,7 +61,10 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseProductDTO> getProductById(@AuthenticationPrincipal User userDetails, @PathVariable UUID id){
+    public ResponseEntity<ResponseProductDTO> getProductById(
+            @AuthenticationPrincipal User userDetails,
+            @PathVariable UUID id)
+    {
         return ResponseEntity.ok(service.findById(userDetails.getId(), id));
     }
 
@@ -68,7 +74,10 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseProductDTO> deleteProductById(@AuthenticationPrincipal User userDetails, @PathVariable UUID id){
+    public ResponseEntity<ResponseProductDTO> deleteProductById(
+            @AuthenticationPrincipal User userDetails,
+            @PathVariable UUID id)
+    {
         ResponseProductDTO response = service.deleteProduct(userDetails.getId(), id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -79,7 +88,11 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<ResponseProductDTO> updateProduct(@AuthenticationPrincipal User userDetails, @PathVariable UUID id, @RequestBody @Valid UpdateProductDTO product){
+    public ResponseEntity<ResponseProductDTO> updateProduct(
+            @AuthenticationPrincipal User userDetails,
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateProductDTO product)
+    {
         ResponseProductDTO response = service.updateProduct(userDetails.getId(), id, product);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -90,7 +103,11 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/{id}/withdraw")
-    public ResponseEntity<ResponseProductDTO> buyProduct(@AuthenticationPrincipal User userDetails, @PathVariable UUID id, @RequestBody @Valid WithdrawOrPutProductDTO product){
+    public ResponseEntity<ResponseProductDTO> buyProduct(
+            @AuthenticationPrincipal User userDetails,
+            @PathVariable UUID id,
+            @RequestBody @Valid WithdrawOrPutProductDTO product)
+    {
         ResponseProductDTO response = service.withdrawProduct(userDetails.getId(), id, product);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -101,7 +118,11 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PatchMapping("/{id}/put")
-    public ResponseEntity<ResponseProductDTO> putProduct(@AuthenticationPrincipal User userDetails, @PathVariable UUID id, @RequestBody @Valid WithdrawOrPutProductDTO product){
+    public ResponseEntity<ResponseProductDTO> putProduct(
+            @AuthenticationPrincipal User userDetails,
+            @PathVariable UUID id,
+            @RequestBody @Valid WithdrawOrPutProductDTO product)
+    {
         ResponseProductDTO response = service.putProduct(userDetails.getId(), id, product);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }

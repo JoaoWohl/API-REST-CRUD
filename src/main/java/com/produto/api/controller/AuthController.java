@@ -36,7 +36,9 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequestDTO request) {
+    public ResponseEntity<Void> login(
+            @RequestBody @Valid LoginRequestDTO request)
+    {
         LoginResponseDTO tokenJwt = service.login(request);
 
         ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", tokenJwt.token())
@@ -59,7 +61,9 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Usuário existente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/register")
-    public ResponseEntity<RegisterUserResponseDTO> register(@RequestBody @Valid RegisterUserRequestDTO request) {
+    public ResponseEntity<RegisterUserResponseDTO> register(
+            @RequestBody @Valid RegisterUserRequestDTO request)
+    {
         RegisterUserResponseDTO response = service.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -70,7 +74,9 @@ public class AuthController {
             @ApiResponse(responseCode = "409", description = "Usuário existente", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/admin/register")
-    public ResponseEntity<RegisterUserResponseDTO> adminRegister(@RequestBody @Valid RegisterUserRequestDTO request) {
+    public ResponseEntity<RegisterUserResponseDTO> adminRegister(
+            @RequestBody @Valid RegisterUserRequestDTO request)
+    {
         RegisterUserResponseDTO response = service.registerAdmin(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
