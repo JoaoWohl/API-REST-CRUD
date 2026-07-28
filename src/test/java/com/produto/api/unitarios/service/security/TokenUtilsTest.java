@@ -1,77 +1,60 @@
 package com.produto.api.unitarios.service.security;
 
-import com.produto.api.security.JWTUserData;
-import com.produto.api.security.JwtTokenService;
+
 import com.produto.api.security.TokenUtils;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class TokenUtilsTest {
-    @Mock
-    private JwtTokenService jwtTokenService;
+class TokenUtilsTest {
 
-    @InjectMocks
     private TokenUtils tokenUtils;
-
-    private String validAuthHeader;
-    private JWTUserData validJwtUserData;
-    private static final UUID USER_ID = UUID.randomUUID();
+    private HttpServletRequest request;
 
     @BeforeEach
     void setUp() {
-        validAuthHeader = "Bearer validToken";
-        validJwtUserData = new JWTUserData(USER_ID);
+        tokenUtils = new TokenUtils();
+        request = mock(HttpServletRequest.class);
     }
 
     @Test
-    void getToken_ShouldReturnSuccess_WhenEverythingIsOk() {
-        String response = tokenUtils.getToken(validAuthHeader);
+    void getTokenByCookie_ShouldReturnToken_WhenJwtCookieExists() {
+        Cookie[] cookies = {
+                new Cookie("OTHER_COOKIE", "123"),
+                new Cookie("JWT_TOKEN", "my-token")
+        };
 
-        assertThat(response).isEqualTo("validToken");
-    }
+        when(request.getCookies()).thenReturn(cookies);
 
-    static Stream<Arguments> invalidAuthHeaders() {
-        return  Stream.of(
-                Arguments.of(""),
-                Arguments.of(" "),
-                Arguments.of((Object) null),
-                Arguments.of("invalidAuthHeader")
-        );
-    }
+        String token = tokenUtils.getTokenByCookie(request);
 
-    @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void getToken_ShouldReturnError_WhenInvalidAuthHeader(String authHeader) {
-        String response = tokenUtils.getToken(authHeader);
-        assertThat(response).isEqualTo(null);
+        assertThat(token).isEqualTo("my-token");
     }
 
     @Test
-    void getUUID_ShouldReturnSuccess_WhenEverythingIsOk() {
-        when(jwtTokenService.validateToken(tokenUtils.getToken(validAuthHeader))).thenReturn(Optional.of(validJwtUserData));
-        UUID response = tokenUtils.getUUID(validAuthHeader);
-        assertThat(response).isEqualTo(USER_ID);
+    void getTokenByCookie_ShouldReturnNull_WhenJwtCookieDoesNotExist() {
+        Cookie[] cookies = {
+                new Cookie("SESSION", "abc"),
+                new Cookie("USER", "joao")
+        };
+
+        when(request.getCookies()).thenReturn(cookies);
+
+        String token = tokenUtils.getTokenByCookie(request);
+
+        assertThat(token).isNull();
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void getUUID_ShouldReturnError_WhenInvalidAuthHeader(String authHeader) {
-        assertThrows(RuntimeException.class, () -> tokenUtils.getUUID(authHeader));
+    @Test
+    void getTokenByCookie_ShouldReturnNull_WhenRequestHasNoCookies() {
+        when(request.getCookies()).thenReturn(null);
+
+        String token = tokenUtils.getTokenByCookie(request);
+
+        assertThat(token).isNull();
     }
 }
