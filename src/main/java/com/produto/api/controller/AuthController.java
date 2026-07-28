@@ -14,7 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,9 +36,21 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO request) {
-        LoginResponseDTO response = service.login(request);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+    public ResponseEntity<Void> login(@RequestBody @Valid LoginRequestDTO request) {
+        LoginResponseDTO tokenJwt = service.login(request);
+
+        ResponseCookie jwtCookie = ResponseCookie.from("JWT_TOKEN", tokenJwt.token())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(86400)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .build();
     }
 
     @Operation(summary = "Cadastra novo usuário")

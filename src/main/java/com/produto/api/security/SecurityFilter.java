@@ -25,17 +25,30 @@ public class SecurityFilter extends OncePerRequestFilter {
     private TokenUtils tokenUtils;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
-        String token = tokenUtils.getToken(authHeader);
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
-        if(optUser.isPresent()){
-            JWTUserData userData = optUser.get();
-            UserDetails userDetails = userRepository.findById(userData.userId()).orElseThrow();
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userData, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = tokenUtils.getTokenByCookie(request);
+
+        if (token != null) {
+            Optional<JWTUserData> optUser = tokenConfig.validateToken(token);
+
+            if(optUser.isPresent()){
+
+                JWTUserData userData = optUser.get();
+
+                UserDetails userDetails = userRepository.findById(userData.userId()).orElse(null);
+
+                if (userDetails != null) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
         }
+
         filterChain.doFilter(request,response);
     }
 }
