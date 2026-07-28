@@ -11,6 +11,7 @@ import com.produto.api.integration.BaseIntegrationTest;
 import com.produto.api.repository.ProductRepository;
 import com.produto.api.repository.UserRepository;
 import com.produto.api.security.JwtTokenService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,9 +81,9 @@ public class ProductControllerTest extends BaseIntegrationTest {
         AddProductDTO request = new AddProductDTO ("Notebook", new BigDecimal("4000.99"), 10);
 
         mockMvc.perform(post("/products")
-            .header("Authorization", "Bearer "+ adminToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isCreated());
 
         List<Product> products = productRepository.findAll();
@@ -131,10 +132,12 @@ public class ProductControllerTest extends BaseIntegrationTest {
     @ParameterizedTest
     @MethodSource("invalidAddProducts")
     void postProduct_ShouldReturnBadRequestError(String name, BigDecimal price, int quantity) throws Exception {
+        User user = createUser(UserRole.ADMIN);
+        String adminToken = authenticateUser(user);
         AddProductDTO request = new AddProductDTO (name, price, quantity);
 
         mockMvc.perform(post("/products")
-            .with(user("usuario").roles("ADMIN"))
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isBadRequest());
@@ -156,7 +159,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         productRepository.save(product);
 
         mockMvc.perform(get("/products")
-            .header("Authorization", "Bearer " + userToken))
+                        .cookie(new Cookie("JWT_TOKEN", userToken)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].name").value("Notebook"))
         .andExpect(jsonPath("$[0].price").value(4000.99))
@@ -167,7 +170,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
     void getAllProducts_ShouldReturnNotFoundError() throws Exception {
         String userToken = authenticateUser(createUser(UserRole.USER));
         mockMvc.perform(get("/products")
-            .header("Authorization", "Bearer " + userToken))
+                        .cookie(new Cookie("JWT_TOKEN", userToken)))
         .andExpect(status().isNotFound());
     }
 
@@ -190,7 +193,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         Product saved = productRepository.save(product);
 
         mockMvc.perform(get("/products/{id}", saved.getId())
-            .header("Authorization", "Bearer " + userToken))
+                        .cookie(new Cookie("JWT_TOKEN", userToken)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id").value(saved.getId().toString()))
         .andExpect(jsonPath("$.name").value("Notebook"))
@@ -202,7 +205,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
     void getProductById_ShouldReturnNotFoundError() throws Exception {
         String userToken = authenticateUser(createUser(UserRole.USER));
         mockMvc.perform(get("/products/{id}", UUID.randomUUID())
-            .header("Authorization", "Bearer " + userToken))
+                        .cookie(new Cookie("JWT_TOKEN", userToken)))
         .andExpect(status().isNotFound());
     }
 
@@ -225,7 +228,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         Product saved = productRepository.save(product);
 
         mockMvc.perform(delete("/products/{id}", saved.getId())
-            .header("Authorization", "Bearer " + adminToken))
+                        .cookie(new Cookie("JWT_TOKEN", adminToken)))
         .andExpect(status().isOk());
     }
 
@@ -233,7 +236,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
     void deleteProductById_ShouldReturnNotFoundError() throws Exception {
         String adminToken = authenticateUser(createUser(UserRole.ADMIN));
         mockMvc.perform(delete("/products/{id}", UUID.randomUUID())
-            .header("Authorization", "Bearer " + adminToken))
+                        .cookie(new Cookie("JWT_TOKEN", adminToken)))
         .andExpect(status().isNotFound());
     }
 
@@ -265,9 +268,9 @@ public class ProductControllerTest extends BaseIntegrationTest {
         UpdateProductDTO request = new UpdateProductDTO("Notebook Gamer", new BigDecimal("4500.89"), 5);
 
         mockMvc.perform(patch("/products/{id}", saved.getId())
-            .header("Authorization", "Bearer " + adminToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk());
 
         List<Product> products = productRepository.findAll();
@@ -281,9 +284,9 @@ public class ProductControllerTest extends BaseIntegrationTest {
         String adminToken = authenticateUser(createUser(UserRole.ADMIN));
         UpdateProductDTO request = new UpdateProductDTO("Notebook Gamer", new BigDecimal("4500.89"), 5);
         mockMvc.perform(patch("/products/{id}", UUID.randomUUID())
-            .header("Authorization", "Bearer " + adminToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(request)))
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isNotFound());
     }
 
@@ -312,7 +315,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         WithdrawOrPutProductDTO request = new WithdrawOrPutProductDTO(57);
 
         mockMvc.perform(patch("/products/{id}/put", saved.getId())
-            .header("Authorization", "Bearer " + adminToken)
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk());
@@ -327,7 +330,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         WithdrawOrPutProductDTO request = new WithdrawOrPutProductDTO(67);
 
         mockMvc.perform(patch("/products/{id}/put", UUID.randomUUID())
-                .header("Authorization", "Bearer " + adminToken)
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -348,7 +351,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         WithdrawOrPutProductDTO request = new WithdrawOrPutProductDTO(10);
 
         mockMvc.perform(patch("/products/{id}/withdraw", saved.getId())
-                .header("Authorization", "Bearer " +  adminToken)
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
@@ -363,7 +366,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         WithdrawOrPutProductDTO request = new WithdrawOrPutProductDTO(10);
 
         mockMvc.perform(patch("/products/{id}/withdraw", UUID.randomUUID())
-                        .header("Authorization", "Bearer " + adminToken)
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
@@ -393,7 +396,7 @@ public class ProductControllerTest extends BaseIntegrationTest {
         WithdrawOrPutProductDTO request = new WithdrawOrPutProductDTO(68);
 
         mockMvc.perform(patch("/products/{id}/withdraw", saved.getId())
-                        .header("Authorization", "Bearer " + adminToken)
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());

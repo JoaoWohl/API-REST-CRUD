@@ -23,8 +23,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TokenUtilsTest {
-    @Mock
-    private JwtTokenService jwtTokenService;
 
     @InjectMocks
     private TokenUtils tokenUtils;
@@ -39,39 +37,4 @@ public class TokenUtilsTest {
         validJwtUserData = new JWTUserData(USER_ID);
     }
 
-    @Test
-    void getToken_ShouldReturnSuccess_WhenEverythingIsOk() {
-        String response = tokenUtils.getToken(validAuthHeader);
-
-        assertThat(response).isEqualTo("validToken");
-    }
-
-    static Stream<Arguments> invalidAuthHeaders() {
-        return  Stream.of(
-                Arguments.of(""),
-                Arguments.of(" "),
-                Arguments.of((Object) null),
-                Arguments.of("invalidAuthHeader")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void getToken_ShouldReturnError_WhenInvalidAuthHeader(String authHeader) {
-        String response = tokenUtils.getToken(authHeader);
-        assertThat(response).isEqualTo(null);
-    }
-
-    @Test
-    void getUUID_ShouldReturnSuccess_WhenEverythingIsOk() {
-        when(jwtTokenService.validateToken(tokenUtils.getToken(validAuthHeader))).thenReturn(Optional.of(validJwtUserData));
-        UUID response = tokenUtils.getUUID(validAuthHeader);
-        assertThat(response).isEqualTo(USER_ID);
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void getUUID_ShouldReturnError_WhenInvalidAuthHeader(String authHeader) {
-        assertThrows(RuntimeException.class, () -> tokenUtils.getUUID(authHeader));
-    }
 }

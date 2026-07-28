@@ -58,7 +58,6 @@ class ProductServiceTest {
     private ResponseProductDTO validResponseUpdatedProductDTO;
     private UpdateProductDTO validUpdateProductDTO;
     private List<Product> productList;
-    private final static String authHeader = "Bearer sadasfgwtwwdsag";
     private final static UUID PRODUCT_ID = UUID.randomUUID();
     private final static UUID USER_ID = UUID.randomUUID();
     private WithdrawOrPutProductDTO withdrawOrPutProductDTO;
@@ -78,27 +77,23 @@ class ProductServiceTest {
         productList = List.of(validEntityProduct);
     }
 
-    static Stream<Arguments> invalidAuthHeaders() {
+    static Stream<Arguments> invalidUserId() {
         return Stream.of(
-                Arguments.of(""),
-                Arguments.of((Object) null),
-                Arguments.of(" ")
+                Arguments.of((Object) null)
         );
     }
 
     @Test
     @DisplayName("Deve retornar successo quando tudo está correto")
     void addProduct_ShouldReturnSuccess() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(validUser));
         when(productRepository.existsByUserIdAndName(USER_ID, validAddProductDTO.name())).thenReturn(false);
         when(mapper.toEntityAdd(validAddProductDTO)).thenReturn(validEntityProduct);
         when(productRepository.save(validEntityProduct)).thenReturn(validEntityProduct);
         when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-        productService.addProduct(authHeader, validAddProductDTO);
+        productService.addProduct(USER_ID, validAddProductDTO);
 
-        verify(tokenUtils, times(1)).getUUID(anyString());
         verify(userRepository, times(1)).findById(any(UUID.class));
         verify(productRepository, times(1)).existsByUserIdAndName(any(UUID.class), anyString());
         verify(mapper, times(1)).toEntityAdd(any(AddProductDTO.class));
@@ -108,11 +103,10 @@ class ProductServiceTest {
 
     @Test
     public void addProduct_ShouldReturnProductExistException_WhenProductWithEqualsNameExist() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(validUser));
         when(productRepository.existsByUserIdAndName(validUser.getId(), validAddProductDTO.name())).thenReturn(true);
 
-        assertThrows(ProductExistException.class, () -> productService.addProduct(authHeader, validAddProductDTO));
+        assertThrows(ProductExistException.class, () -> productService.addProduct(USER_ID, validAddProductDTO));
 
         verify(productRepository, times(1)).existsByUserIdAndName(any(UUID.class), anyString());
         verify(productRepository, never()).save(any(Product.class));
@@ -138,25 +132,24 @@ class ProductServiceTest {
     @MethodSource("addInvalidProducts")
     void addProduct_ShouldReturnFail_WhenNameIsEmpty(String name, BigDecimal price, Integer quantity) {
         AddProductDTO invalidProductDTO = new AddProductDTO(name, price, quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(authHeader, invalidProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(USER_ID, invalidProductDTO));
 
         verify(mapper, never()).toEntityAdd(any(AddProductDTO.class));
         verify(productRepository, never()).save(any(Product.class));
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void addProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(invalidAuthHeader, validAddProductDTO));
+    @MethodSource("invalidUserId")
+    void addProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(invalidUserId, validAddProductDTO));
     }
 
     @Test
     void findAll_ShouldReturnSuccess_WhenAllOk() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findAllByUserId(USER_ID)).thenReturn(productList);
         when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-        List<ResponseProductDTO> result = productService.findAll(authHeader);
+        List<ResponseProductDTO> result = productService.findAll(USER_ID);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().id()).isEqualTo(PRODUCT_ID);
@@ -166,27 +159,25 @@ class ProductServiceTest {
 
     @Test
     void findAll_ShouldReturnProductNotFoundException_WhenNotHaveProducts() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findAllByUserId(USER_ID)).thenReturn(Collections.emptyList());
 
-        assertThrows(ProductNotFoundException.class, () -> productService.findAll(authHeader));
+        assertThrows(ProductNotFoundException.class, () -> productService.findAll(USER_ID));
 
         verify(productRepository, times(1)).findAllByUserId(any());
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void findAll_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.findAll(invalidAuthHeader));
+    @MethodSource("invalidUserId")
+    void findAll_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.findAll(invalidUserId));
     }
 
     @Test
     void findById_ShouldReturnSuccess_WhenEverythingIsOk() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-        ResponseProductDTO result = productService.findById(authHeader, PRODUCT_ID);
+        ResponseProductDTO result = productService.findById(USER_ID, PRODUCT_ID);
 
         assertThat(result).isEqualTo(validResponseProductDTO);
         verify(productRepository, times(1)).findByUserIdAndId(any(UUID.class), any(UUID.class));
@@ -194,27 +185,26 @@ class ProductServiceTest {
 
     @Test
     void findById_ShouldReturnFail_WhenProductIdIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> productService.findById(authHeader, null));
+        assertThrows(IllegalArgumentException.class, () -> productService.findById(USER_ID, null));
     }
 
     @Test
     void findById_ShouldReturnFail_WhenIdNotFound() {
-        assertThrows(ProductNotFoundException.class, () -> productService.findById(authHeader, PRODUCT_ID));
+        assertThrows(ProductNotFoundException.class, () -> productService.findById(USER_ID, PRODUCT_ID));
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void findById_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.findById(invalidAuthHeader, PRODUCT_ID));
+    @MethodSource("invalidUserId")
+    void findById_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.findById(invalidUserId, PRODUCT_ID));
     }
 
     @Test
     void deleteProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(mapper.toDTO(validEntityProduct)).thenReturn(validResponseProductDTO);
 
-        ResponseProductDTO result = productService.deleteProduct(authHeader, PRODUCT_ID);
+        ResponseProductDTO result = productService.deleteProduct(USER_ID, PRODUCT_ID);
 
         assertThat(result).isEqualTo(validResponseProductDTO);
 
@@ -223,37 +213,35 @@ class ProductServiceTest {
 
     @Test
     void deleteProduct_ShouldReturnFail_WhenIdIsNotFound() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(authHeader, PRODUCT_ID));
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(USER_ID, PRODUCT_ID));
 
         verify(productRepository, never()).deleteById(any());
     }
 
     @Test
     void deleteProduct_ShouldReturnFail_WhenIdIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(authHeader, null));
+        assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(USER_ID, null));
 
         verify(productRepository, never()).deleteById(any());
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void deleteProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(invalidAuthHeader, PRODUCT_ID));
+    @MethodSource("invalidUserId")
+    void deleteProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.deleteProduct(invalidUserId, PRODUCT_ID));
     }
 
     @Test
     void updateProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(productRepository.existsByUserIdAndName(USER_ID, validUpdateProductDTO.name())).thenReturn(false);
         when(mapper.toEntityUpdate(any(), any())).thenReturn(validUpdatedEntityProduct);
         when(productRepository.save(any(Product.class))).thenReturn(validUpdatedEntityProduct);
         when(mapper.toDTO(any(Product.class))).thenReturn(validResponseUpdatedProductDTO);
 
-        ResponseProductDTO result = productService.updateProduct(authHeader, PRODUCT_ID, validUpdateProductDTO);
+        ResponseProductDTO result = productService.updateProduct(USER_ID, PRODUCT_ID, validUpdateProductDTO);
 
         assertThat(result).isEqualTo(validResponseUpdatedProductDTO);
 
@@ -264,7 +252,7 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_ShouldReturnFail_WhenIdIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(authHeader, null, validUpdateProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(USER_ID, null, validUpdateProductDTO));
 
         verify(productRepository, never()).findById(any());
         verify(productRepository, never()).save(any());
@@ -273,11 +261,10 @@ class ProductServiceTest {
 
     @Test
     void updateProduct_ShouldReturnFail_WhenProductExist() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(productRepository.existsByUserIdAndName(USER_ID, validUpdateProductDTO.name())).thenReturn(true);
 
-        assertThrows(ProductExistException.class, () -> productService.updateProduct(authHeader, PRODUCT_ID, validUpdateProductDTO));
+        assertThrows(ProductExistException.class, () -> productService.updateProduct(USER_ID, PRODUCT_ID, validUpdateProductDTO));
 
         verify(productRepository, times(1)).findByUserIdAndId(any(), any());
         verify(productRepository, never()).save(any());
@@ -286,9 +273,9 @@ class ProductServiceTest {
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void updateProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(invalidAuthHeader, PRODUCT_ID, validUpdateProductDTO));
+    @MethodSource("invalidUserId")
+    void updateProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(invalidUserId, PRODUCT_ID, validUpdateProductDTO));
     }
 
     static Stream<Arguments> updateInvalidProducts() {
@@ -311,7 +298,7 @@ class ProductServiceTest {
     @MethodSource("updateInvalidProducts")
     void updateProduct_ShouldReturnIllegalArgumentException(String name, BigDecimal price, Integer quantity) {
         UpdateProductDTO invalidUpdateProductDTO = new UpdateProductDTO(name, price, quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(authHeader, PRODUCT_ID, invalidUpdateProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(USER_ID, PRODUCT_ID, invalidUpdateProductDTO));
 
         verify(productRepository, never()).findById(any());
         verify(productRepository, never()).save(any());
@@ -322,11 +309,10 @@ class ProductServiceTest {
     @Test
     void withdrawProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
         ResponseProductDTO withdrawProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 90);
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(mapper.toDTO(any(Product.class))).thenReturn(withdrawProductResponseDTO);
 
-        ResponseProductDTO result = productService.withdrawProduct(authHeader, PRODUCT_ID, withdrawOrPutProductDTO);
+        ResponseProductDTO result = productService.withdrawProduct(USER_ID, PRODUCT_ID, withdrawOrPutProductDTO);
 
         assertThat(result).isEqualTo(withdrawProductResponseDTO);
 
@@ -337,27 +323,25 @@ class ProductServiceTest {
 
     @Test
     void withdrawProduct_ShouldReturnFail_WhenIdIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(authHeader, null, withdrawOrPutProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(USER_ID, null, withdrawOrPutProductDTO));
     }
 
     @Test
     void withdrawProduct_ShouldReturnFail_WhenProductIsNotFound() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.empty());
-        assertThrows(ProductNotFoundException.class, () -> productService.withdrawProduct(authHeader, PRODUCT_ID, withdrawOrPutProductDTO));
+        assertThrows(ProductNotFoundException.class, () -> productService.withdrawProduct(USER_ID, PRODUCT_ID, withdrawOrPutProductDTO));
     }
 
     @Test
     void withdrawProduct_ShouldReturnFail_WhenQuantityIsGreaterThanStock() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
-        assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(authHeader, PRODUCT_ID, bigWithdrawOrPutProductDTO));
+        assertThrows(NotEnoghProductException.class, () -> productService.withdrawProduct(USER_ID, PRODUCT_ID, bigWithdrawOrPutProductDTO));
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void withdrawProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(invalidAuthHeader, PRODUCT_ID, withdrawOrPutProductDTO));
+    @MethodSource("invalidUserId")
+    void withdrawProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(invalidUserId, PRODUCT_ID, withdrawOrPutProductDTO));
     }
 
     static Stream<Arguments> withdrawOrPutInvalidProducts() {
@@ -372,17 +356,16 @@ class ProductServiceTest {
     @MethodSource("withdrawOrPutInvalidProducts")
     void withdrawProduct_ShouldReturnIllegalArgumentExceptions(Integer quantity) {
         WithdrawOrPutProductDTO invalidWithdrawProductDTO = new WithdrawOrPutProductDTO(quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(authHeader, PRODUCT_ID, invalidWithdrawProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(USER_ID, PRODUCT_ID, invalidWithdrawProductDTO));
     }
 
     @Test
     void putProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
         ResponseProductDTO putProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 110);
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.of(validEntityProduct));
         when(mapper.toDTO(any(Product.class))).thenReturn(putProductResponseDTO);
 
-        ResponseProductDTO result = productService.putProduct(authHeader, PRODUCT_ID, withdrawOrPutProductDTO);
+        ResponseProductDTO result = productService.putProduct(USER_ID, PRODUCT_ID, withdrawOrPutProductDTO);
 
         assertThat(result).isEqualTo(putProductResponseDTO);
 
@@ -393,27 +376,26 @@ class ProductServiceTest {
 
     @Test
     void putProduct_ShouldReturnFail_WhenIdIsNull() {
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(authHeader, null, withdrawOrPutProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(USER_ID, null, withdrawOrPutProductDTO));
     }
 
     @Test
     void putProduct_ShouldReturnFail_WhenProductIsNotFound() {
-        when(tokenUtils.getUUID(authHeader)).thenReturn(USER_ID);
         when(productRepository.findByUserIdAndId(USER_ID, PRODUCT_ID)).thenReturn(Optional.empty());
-        assertThrows(ProductNotFoundException.class, () -> productService.putProduct(authHeader, PRODUCT_ID, withdrawOrPutProductDTO));
+        assertThrows(ProductNotFoundException.class, () -> productService.putProduct(USER_ID, PRODUCT_ID, withdrawOrPutProductDTO));
     }
 
     @ParameterizedTest
-    @MethodSource("invalidAuthHeaders")
-    void putProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(String invalidAuthHeader) {
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(invalidAuthHeader, PRODUCT_ID, withdrawOrPutProductDTO));
+    @MethodSource("invalidUserId")
+    void putProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(invalidUserId, PRODUCT_ID, withdrawOrPutProductDTO));
     }
 
     @ParameterizedTest
     @MethodSource("withdrawOrPutInvalidProducts")
     void putProduct_ShouldReturnIllegalArgumentExceptions(Integer quantity) {
         WithdrawOrPutProductDTO invalidPutProductDTO = new WithdrawOrPutProductDTO(quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(authHeader, PRODUCT_ID, invalidPutProductDTO));
+        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(USER_ID, PRODUCT_ID, invalidPutProductDTO));
     }
 
 }
