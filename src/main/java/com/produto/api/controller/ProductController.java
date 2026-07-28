@@ -4,6 +4,7 @@ import com.produto.api.dto.request.product.AddProductDTO;
 import com.produto.api.dto.response.product.ResponseProductDTO;
 import com.produto.api.dto.request.product.UpdateProductDTO;
 import com.produto.api.dto.request.product.WithdrawOrPutProductDTO;
+import com.produto.api.entity.user.User;
 import com.produto.api.exception.ErrorResponse;
 import com.produto.api.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,8 +35,8 @@ public class ProductController {
             @ApiResponse(responseCode = "201", description = "Produto Adicionado")
     })
     @PostMapping
-    public ResponseEntity<ResponseProductDTO> addProduct(@RequestHeader("Authorization") String authHeader ,@RequestBody @Valid AddProductDTO product){
-        ResponseProductDTO response = service.addProduct(authHeader, product);
+    public ResponseEntity<ResponseProductDTO> addProduct(@AuthenticationPrincipal User userDetails ,@RequestBody @Valid AddProductDTO product){
+        ResponseProductDTO response = service.addProduct(userDetails.getId(), product);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -44,8 +46,10 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produtos não encontrados", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<List<ResponseProductDTO>> getAllProducts(@RequestHeader("Authorization") String authHeader){
-        return ResponseEntity.ok(service.findAll(authHeader));
+    public ResponseEntity<List<ResponseProductDTO>> getAllProducts(
+            @AuthenticationPrincipal User userDetails
+    ){
+        return ResponseEntity.ok(service.findAll(userDetails.getId()));
     }
 
     @Operation(summary = "Busca produto por ID")
@@ -54,8 +58,8 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseProductDTO> getProductById(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id){
-        return ResponseEntity.ok(service.findById(authHeader, id));
+    public ResponseEntity<ResponseProductDTO> getProductById(@AuthenticationPrincipal User userDetails, @PathVariable UUID id){
+        return ResponseEntity.ok(service.findById(userDetails.getId(), id));
     }
 
     @Operation(summary = "Deleta produto por ID")
@@ -64,8 +68,8 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponseProductDTO> deleteProductById(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id){
-        ResponseProductDTO response = service.deleteProduct(authHeader, id);
+    public ResponseEntity<ResponseProductDTO> deleteProductById(@AuthenticationPrincipal User userDetails, @PathVariable UUID id){
+        ResponseProductDTO response = service.deleteProduct(userDetails.getId(), id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -75,8 +79,8 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<ResponseProductDTO> updateProduct(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestBody @Valid UpdateProductDTO product){
-        ResponseProductDTO response = service.updateProduct(authHeader, id, product);
+    public ResponseEntity<ResponseProductDTO> updateProduct(@AuthenticationPrincipal User userDetails, @PathVariable UUID id, @RequestBody @Valid UpdateProductDTO product){
+        ResponseProductDTO response = service.updateProduct(userDetails.getId(), id, product);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -86,8 +90,8 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/{id}/withdraw")
-    public ResponseEntity<ResponseProductDTO> buyProduct(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestBody @Valid WithdrawOrPutProductDTO product){
-        ResponseProductDTO response = service.withdrawProduct(authHeader, id, product);
+    public ResponseEntity<ResponseProductDTO> buyProduct(@AuthenticationPrincipal User userDetails, @PathVariable UUID id, @RequestBody @Valid WithdrawOrPutProductDTO product){
+        ResponseProductDTO response = service.withdrawProduct(userDetails.getId(), id, product);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -97,8 +101,8 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))),
     })
     @PatchMapping("/{id}/put")
-    public ResponseEntity<ResponseProductDTO> putProduct(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestBody @Valid WithdrawOrPutProductDTO product){
-        ResponseProductDTO response = service.putProduct(authHeader, id, product);
+    public ResponseEntity<ResponseProductDTO> putProduct(@AuthenticationPrincipal User userDetails, @PathVariable UUID id, @RequestBody @Valid WithdrawOrPutProductDTO product){
+        ResponseProductDTO response = service.putProduct(userDetails.getId(), id, product);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
