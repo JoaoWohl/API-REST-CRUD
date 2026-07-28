@@ -1,23 +1,22 @@
 package com.produto.api.dto.request.product;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
 public record AddProductDTO(
         @Schema(example = "notebook")
-        @NotNull(message = "O nome não pode ser nulo")
+        @NotBlank(message = "O nome não pode estar em branco")
         String name,
 
         @Schema(example = "4500.00")
         @NotNull(message = "O preço não pode ser nulo")
-        @PositiveOrZero(message = "O preço não pode ser negativo")
+        @Positive(message = "O preço deve ser maior que zero")
         BigDecimal price,
 
         @Schema(example = "10")
         @NotNull(message = "A quantidade não pode ser nula")
-        @PositiveOrZero(message = "A quantidade não pode ser negativa")
+        @Positive(message = "A quantidade deve ser maior que zero")
         Integer quantity
 ) {}

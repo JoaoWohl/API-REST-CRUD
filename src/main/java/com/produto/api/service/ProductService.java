@@ -28,14 +28,9 @@ public class ProductService {
     ProductMapper mapper;
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    TokenUtils tokenUtils;
 
     public ResponseProductDTO addProduct(UUID userId, AddProductDTO product) {
         if (userId == null) throw new IllegalArgumentException();
-        if (product.name() == null || product.name().isBlank()) throw new IllegalArgumentException();
-        if (product.quantity() == null || product.quantity() <= 0) throw new IllegalArgumentException();
-        if (product.price() == null || product.price().compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException();
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
 
@@ -72,13 +67,13 @@ public class ProductService {
     public ResponseProductDTO updateProduct(UUID userId, UUID id, UpdateProductDTO updatedProduct) {
         if (userId == null) throw new IllegalArgumentException();
         if (id == null) throw new IllegalArgumentException();
-        if (updatedProduct.name() == null || updatedProduct.name().isBlank()) throw new IllegalArgumentException();
-        if (updatedProduct.quantity() == null || updatedProduct.quantity() <= 0) throw new IllegalArgumentException();
-        if (updatedProduct.price() == null || updatedProduct.price().compareTo(BigDecimal.ZERO) <= 0 ) throw new IllegalArgumentException();
+
         Product product = productRepository.findByUserIdAndId(userId, id).orElseThrow(() ->  new ProductNotFoundException("Product with id " + id + " not found"));
+
         if (!product.getName().equals(updatedProduct.name())) {
             if (productRepository.existsByUserIdAndName(userId, updatedProduct.name()))  throw new ProductExistException();
         }
+
         mapper.toEntityUpdate(updatedProduct, product);
         productRepository.save(product);
         return mapper.toDTO(product);
@@ -87,7 +82,7 @@ public class ProductService {
     public ResponseProductDTO withdrawProduct(UUID userId, UUID id, WithdrawOrPutProductDTO withdrawProduct) {
         if (userId == null) throw new IllegalArgumentException();
         if (id == null) throw new IllegalArgumentException();
-        if (withdrawProduct.quantity() == null || withdrawProduct.quantity() <= 0) throw new IllegalArgumentException();
+
         Product product = productRepository.findByUserIdAndId(userId, id).orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
         if (product.getQuantity() < withdrawProduct.quantity()) throw new NotEnoghProductException("Not enough products in stock");
         product.setQuantity(product.getQuantity()-withdrawProduct.quantity());
@@ -98,7 +93,7 @@ public class ProductService {
     public ResponseProductDTO putProduct(UUID userId, UUID id, WithdrawOrPutProductDTO putProduct) {
         if (userId == null) throw new IllegalArgumentException();
         if (id == null) throw new IllegalArgumentException();
-        if (putProduct.quantity() == null || putProduct.quantity() <= 0) throw new IllegalArgumentException();
+
         Product product = productRepository.findByUserIdAndId(userId, id).orElseThrow(() -> new ProductNotFoundException("Product with id " + id + " not found"));
         product.setQuantity(product.getQuantity()+putProduct.quantity());
         productRepository.save(product);

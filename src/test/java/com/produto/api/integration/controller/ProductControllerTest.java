@@ -70,8 +70,30 @@ public class ProductControllerTest extends BaseIntegrationTest {
 
         return userRepository.save(user);
     }
+
     private String authenticateUser(User user) {
         return jwtTokenService.generateToken(user);
+    }
+
+    static Stream<Arguments> invalidProductsDTO() {
+        return Stream.of(
+                Arguments.of("Product Name", new BigDecimal("100.99"), -100),
+                Arguments.of("Product Name", new BigDecimal("100.99"), 0),
+                Arguments.of("Product Name", new BigDecimal("-100.99"), 100),
+                Arguments.of("Product Name", new BigDecimal("0"), 100),
+                Arguments.of("Product Name", null, 100),
+                Arguments.of("", new BigDecimal("100.99"), 100),
+                Arguments.of(" ", new BigDecimal("100.99"), 100),
+                Arguments.of(null, new BigDecimal("100.99"), 100)
+        );
+    }
+
+    static Stream<Arguments> invalidPutOrWithdrawDTO() {
+        return Stream.of(
+                Arguments.of(-1),
+                Arguments.of(0),
+                Arguments.of((Object) null)
+        );
     }
 
     //postProduct
@@ -116,22 +138,9 @@ public class ProductControllerTest extends BaseIntegrationTest {
         .andExpect(status().isForbidden());
     }
 
-    static Stream<Arguments> invalidAddProducts() {
-        return Stream.of(
-                Arguments.of("Product Name", new BigDecimal("100.99"), -100),
-                Arguments.of("Product Name", new BigDecimal("100.99"), 0),
-                Arguments.of("Product Name", new BigDecimal("-100.99"), 100),
-                Arguments.of("Product Name", new BigDecimal("0"), 100),
-                Arguments.of("Product Name", null, 100),
-                Arguments.of("", new BigDecimal("100.99"), 100),
-                Arguments.of(" ", new BigDecimal("100.99"), 100),
-                Arguments.of(null, new BigDecimal("100.99"), 100)
-        );
-    }
-
     @ParameterizedTest
-    @MethodSource("invalidAddProducts")
-    void postProduct_ShouldReturnBadRequestError(String name, BigDecimal price, int quantity) throws Exception {
+    @MethodSource("invalidProductsDTO")
+    void postProduct_ShouldReturnBadRequestError(String name, BigDecimal price, Integer quantity) throws Exception {
         User user = createUser(UserRole.ADMIN);
         String adminToken = authenticateUser(user);
         AddProductDTO request = new AddProductDTO (name, price, quantity);
@@ -300,6 +309,31 @@ public class ProductControllerTest extends BaseIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @ParameterizedTest
+    @MethodSource("invalidProductsDTO")
+    void updateProduct_ShouldReturnBadRequestError(String name, BigDecimal price, Integer quantity) throws Exception {
+        User user = createUser(UserRole.ADMIN);
+        String adminToken = authenticateUser(user);
+        UpdateProductDTO request = new UpdateProductDTO(name, price, quantity);
+        Product product = new Product();
+        product.setQuantity(10);
+        product.setName("Notebook");
+        product.setPrice(new BigDecimal("4000.99"));
+        product.setUser(user);
+        Product saved = productRepository.save(product);
+
+        mockMvc.perform(patch("/products/{id}", saved.getId())
+                .cookie(new Cookie("JWT_TOKEN", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        List<Product> products = productRepository.findAll();
+        assertThat(products.getFirst().getName()).isEqualTo("Notebook");
+        assertThat(products.getFirst().getPrice()).isEqualTo(new BigDecimal("4000.99"));
+        assertThat(products.getFirst().getQuantity()).isEqualTo(10);
+    }
+
     //putProduct
     @Test
     void putProduct_ShouldReturnOk() throws Exception {
@@ -334,6 +368,30 @@ public class ProductControllerTest extends BaseIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPutOrWithdrawDTO")
+    void putProduct_ShouldReturnBadRequestError(Integer quantity) throws Exception {
+        User user = createUser(UserRole.ADMIN);
+        String adminToken = authenticateUser(user);
+        Product product = new Product();
+        product.setQuantity(10);
+        product.setName("Notebook");
+        product.setPrice(new BigDecimal("4000.99"));
+        product.setUser(user);
+        Product saved = productRepository.save(product);
+
+        WithdrawOrPutProductDTO invalidRequest = new WithdrawOrPutProductDTO(quantity);
+
+        mockMvc.perform(patch("/products/{id}/put", saved.getId())
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest());
+
+        List<Product> products = productRepository.findAll();
+        assertThat(products.getFirst().getQuantity()).isEqualTo(10);
     }
 
     //withdrawProduct
@@ -403,5 +461,29 @@ public class ProductControllerTest extends BaseIntegrationTest {
 
         List<Product> products = productRepository.findAll();
         assertThat(products.getFirst().getQuantity()).isEqualTo(67);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPutOrWithdrawDTO")
+    void withdrawProduct_ShouldReturnBadRequestError(Integer quantity) throws Exception {
+        User user = createUser(UserRole.ADMIN);
+        String adminToken = authenticateUser(user);
+        Product product = new Product();
+        product.setQuantity(77);
+        product.setName("Notebook");
+        product.setPrice(new BigDecimal("4000.99"));
+        product.setUser(user);
+        Product saved = productRepository.save(product);
+
+        WithdrawOrPutProductDTO request = new WithdrawOrPutProductDTO(quantity);
+
+        mockMvc.perform(patch("/products/{id}/withdraw", saved.getId())
+                        .cookie(new Cookie("JWT_TOKEN", adminToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+
+        List<Product> products = productRepository.findAll();
+        assertThat(products.getFirst().getQuantity()).isEqualTo(77);
     }
 }

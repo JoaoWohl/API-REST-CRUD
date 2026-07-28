@@ -44,8 +44,6 @@ class ProductServiceTest {
     ProductMapper mapper;
     @Mock
     UserRepository userRepository;
-    @Mock
-    TokenUtils tokenUtils;
 
     @InjectMocks
     ProductService productService;
@@ -109,32 +107,6 @@ class ProductServiceTest {
         assertThrows(ProductExistException.class, () -> productService.addProduct(USER_ID, validAddProductDTO));
 
         verify(productRepository, times(1)).existsByUserIdAndName(any(UUID.class), anyString());
-        verify(productRepository, never()).save(any(Product.class));
-    }
-
-    static Stream<Arguments> addInvalidProducts() {
-        return Stream.of(
-                Arguments.of("Product Name", new BigDecimal("100.99"), -100),
-                Arguments.of("Product Name", new BigDecimal("100.99"), 0),
-                Arguments.of("Product Name", new BigDecimal("100.99"), null),
-
-                Arguments.of("Product Name", new BigDecimal("-100.99"), 100),
-                Arguments.of("Product Name", new BigDecimal("0"), 100),
-                Arguments.of("Product Name", null, 100),
-
-                Arguments.of(null, new BigDecimal("100.99"), 100),
-                Arguments.of("", new BigDecimal("100.99"), 100),
-                Arguments.of(" ", new BigDecimal("100.99"), 100)
-                );
-    }
-
-    @ParameterizedTest
-    @MethodSource("addInvalidProducts")
-    void addProduct_ShouldReturnFail_WhenNameIsEmpty(String name, BigDecimal price, Integer quantity) {
-        AddProductDTO invalidProductDTO = new AddProductDTO(name, price, quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.addProduct(USER_ID, invalidProductDTO));
-
-        verify(mapper, never()).toEntityAdd(any(AddProductDTO.class));
         verify(productRepository, never()).save(any(Product.class));
     }
 
@@ -278,34 +250,6 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(invalidUserId, PRODUCT_ID, validUpdateProductDTO));
     }
 
-    static Stream<Arguments> updateInvalidProducts() {
-        return Stream.of(
-                Arguments.of("", new BigDecimal("200.99"), 200),
-                Arguments.of(" ", new BigDecimal("200.99"), 200),
-                Arguments.of(null, new BigDecimal("200.99"), 200),
-
-                Arguments.of("Product Name Test", new BigDecimal("-200.99"), 200),
-                Arguments.of("Product Name Test", new BigDecimal("0"), 200),
-                Arguments.of("Product Name Test", null, 200),
-
-                Arguments.of("Product Name Test", new BigDecimal("200.99"), -200),
-                Arguments.of("Product Name Test", new BigDecimal("200.99"), 0),
-                Arguments.of("Product Name Test", new BigDecimal("200.99"), null)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("updateInvalidProducts")
-    void updateProduct_ShouldReturnIllegalArgumentException(String name, BigDecimal price, Integer quantity) {
-        UpdateProductDTO invalidUpdateProductDTO = new UpdateProductDTO(name, price, quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.updateProduct(USER_ID, PRODUCT_ID, invalidUpdateProductDTO));
-
-        verify(productRepository, never()).findById(any());
-        verify(productRepository, never()).save(any());
-        verify(mapper, never()).toEntityUpdate(any(), any());
-        verify(mapper, never()).toDTO(any());
-    }
-
     @Test
     void withdrawProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
         ResponseProductDTO withdrawProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 90);
@@ -344,21 +288,6 @@ class ProductServiceTest {
         assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(invalidUserId, PRODUCT_ID, withdrawOrPutProductDTO));
     }
 
-    static Stream<Arguments> withdrawOrPutInvalidProducts() {
-        return Stream.of(
-                Arguments.of(0),
-                Arguments.of((Object) null),
-                Arguments.of(-10)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("withdrawOrPutInvalidProducts")
-    void withdrawProduct_ShouldReturnIllegalArgumentExceptions(Integer quantity) {
-        WithdrawOrPutProductDTO invalidWithdrawProductDTO = new WithdrawOrPutProductDTO(quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.withdrawProduct(USER_ID, PRODUCT_ID, invalidWithdrawProductDTO));
-    }
-
     @Test
     void putProduct_ShouldReturnSuccess_WhenEverythingIsOk() {
         ResponseProductDTO putProductResponseDTO = validResponseProductDTO = new ResponseProductDTO(PRODUCT_ID, "Product Name", new BigDecimal("100.99"), 110);
@@ -389,13 +318,6 @@ class ProductServiceTest {
     @MethodSource("invalidUserId")
     void putProduct_ShouldReturnIllegalArgumentException_WhenInvalidAuthHeader(UUID invalidUserId) {
         assertThrows(IllegalArgumentException.class, () -> productService.putProduct(invalidUserId, PRODUCT_ID, withdrawOrPutProductDTO));
-    }
-
-    @ParameterizedTest
-    @MethodSource("withdrawOrPutInvalidProducts")
-    void putProduct_ShouldReturnIllegalArgumentExceptions(Integer quantity) {
-        WithdrawOrPutProductDTO invalidPutProductDTO = new WithdrawOrPutProductDTO(quantity);
-        assertThrows(IllegalArgumentException.class, () -> productService.putProduct(USER_ID, PRODUCT_ID, invalidPutProductDTO));
     }
 
 }
