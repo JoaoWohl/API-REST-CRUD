@@ -7,6 +7,8 @@ import com.produto.api.entity.user.User;
 import com.produto.api.entity.user.UserRole;
 import com.produto.api.integration.BaseIntegrationTest;
 import com.produto.api.repository.UserRepository;
+import com.produto.api.security.JwtTokenService;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class AuthControllerTest extends BaseIntegrationTest {
 
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    JwtTokenService jwtTokenService;
 
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -173,6 +178,26 @@ public class AuthControllerTest extends BaseIntegrationTest {
                         .with(user("usuario").roles("USER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void logout_ShouldReturnSuccess() throws Exception {
+        User user = new User();
+        user.setLogin("logintest@test.com");
+        user.setPassword(bCryptPasswordEncoder.encode("testPassword"));
+        user.setName("testName");
+        user.setRole(UserRole.USER);
+        userRepository.save(user);
+
+        mockMvc.perform(post("/auth/logout")
+                .cookie(new Cookie("JWT_TOKEN", jwtTokenService.generateToken(user))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void logout_ShouldReturnForbidden() throws Exception {
+        mockMvc.perform(post("/auth/logout"))
                 .andExpect(status().isForbidden());
     }
 }
