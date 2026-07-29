@@ -78,6 +78,22 @@ public class AuthController {
             @RequestBody @Valid RegisterUserRequestDTO request)
     {
         RegisterUserResponseDTO response = service.registerAdmin(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie cleanCookie = ResponseCookie.from("JWT_TOKEN", "")
+                .httpOnly(true)
+                .secure(false) // Mude para true em produção
+                .path("/")
+                .maxAge(0)     // Expira o cookie imediatamente
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cleanCookie.toString())
+                .build();
     }
 }
