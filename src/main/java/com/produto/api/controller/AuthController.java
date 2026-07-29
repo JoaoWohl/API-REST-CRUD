@@ -4,6 +4,7 @@ import com.produto.api.dto.request.user.LoginRequestDTO;
 import com.produto.api.dto.request.user.RegisterUserRequestDTO;
 import com.produto.api.dto.response.user.LoginResponseDTO;
 import com.produto.api.dto.response.user.RegisterUserResponseDTO;
+import com.produto.api.entity.user.User;
 import com.produto.api.exception.ErrorResponse;
 import com.produto.api.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,10 +19,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @Tag(name = "Auth", description = "Endpoints de autenticação")
 @RestController
@@ -83,7 +84,8 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout() {
+    public ResponseEntity<Void> logout()
+    {
         ResponseCookie cleanCookie = ResponseCookie.from("JWT_TOKEN", "")
                 .httpOnly(true)
                 .secure(false) // Mude para true em produção
@@ -96,4 +98,20 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cleanCookie.toString())
                 .build();
     }
+
+    @PostMapping("/delete-request")
+    public ResponseEntity<Void> deleteRequest(@AuthenticationPrincipal User userDetails)
+    {
+        service.requestDeleteUser(userDetails.getId());
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).build();
+    }
+
+    @PostMapping("/confirm-deletion")
+    public ResponseEntity<Void> confirmDeletion(@RequestParam("token") UUID token) {
+        service.confirmDeleteUser(token);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
 }
