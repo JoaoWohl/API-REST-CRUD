@@ -96,8 +96,6 @@ public class AuthService {
 
         DeleteUserToken newDeleteToken =  new DeleteUserToken();
         newDeleteToken.setUser(user);
-        newDeleteToken.setCreated_at(LocalDateTime.now());
-        newDeleteToken.setExpires_at(LocalDateTime.now().plusHours(12));
 
         DeleteUserToken savedDeleteToken = deleteUserTokenRepository.save(newDeleteToken);
 
