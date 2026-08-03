@@ -14,14 +14,14 @@ public class EmailService {
     JavaMailSender mailSender;
 
     @Async
-    void sendDeleteUserEmail(String toEmail,
+    public void sendDeleteUserEmail(String toEmail,
                              UUID deleteUserToken)
     {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Confirmação de Exclusão de Conta");
         message.setText("Clique no link para confirmar a exclusão da sua conta: "
-                + "https://localhost:8080/auth/confirm-deletion?token=" + deleteUserToken);
+                + "http://localhost:8080/auth/confirm-deletion?token=" + deleteUserToken);
 
         mailSender.send(message);
     }

@@ -2,6 +2,10 @@ package com.produto.api.service;
 
 import com.produto.api.entity.DeleteUserToken;
 import com.produto.api.exception.auth.EmailOrPasswordWrongException;
+import com.produto.api.exception.auth.UserNotFoundException;
+import com.produto.api.exception.auth.deletion.ExpiredTokenException;
+import com.produto.api.exception.auth.deletion.NonexistentTokenException;
+import com.produto.api.exception.auth.deletion.UsedTokenException;
 import com.produto.api.repository.DeleteUserTokenRepository;
 import com.produto.api.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
@@ -92,7 +96,7 @@ public class AuthService {
 
     @Transactional
     public void requestDeleteUser(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
         DeleteUserToken newDeleteToken =  new DeleteUserToken();
         newDeleteToken.setUser(user);
@@ -104,10 +108,11 @@ public class AuthService {
 
     @Transactional
     public void confirmDeleteUser(UUID deleteUserToken) {
-        DeleteUserToken token = deleteUserTokenRepository.findByToken(deleteUserToken).orElseThrow(() -> new RuntimeException("Token inexistente"));
-        if (token.isUsed()) throw new RuntimeException("Token utilizado");
-        if (token.getExpires_at().isBefore(LocalDateTime.now())) throw new RuntimeException("Token expirado");
-        userRepository.deleteById(token.getUser().getId());
+        DeleteUserToken token = deleteUserTokenRepository.findByToken(deleteUserToken).orElseThrow(NonexistentTokenException::new);
+        if (token.isUsed()) throw new UsedTokenException();
+        if (token.getExpires_at().isBefore(LocalDateTime.now())) throw new ExpiredTokenException();
         token.setUsed(true);
+        deleteUserTokenRepository.save(token);
+        userRepository.deleteById(token.getUser().getId());
     }
 }

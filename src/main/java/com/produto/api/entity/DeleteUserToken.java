@@ -2,9 +2,7 @@ package com.produto.api.entity;
 
 import com.produto.api.entity.user.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,6 +13,9 @@ import java.util.UUID;
 @ToString
 @Entity
 @Table(name = "delete_tokens")
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class DeleteUserToken {
 
     @Id
@@ -25,8 +26,9 @@ public class DeleteUserToken {
     @Column(unique = true, nullable = false, name = "token")
     private UUID token = UUID.randomUUID();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "user_id")
+    @NonNull
     private User user;
 
     @Column(name = "created_at", nullable = false)
