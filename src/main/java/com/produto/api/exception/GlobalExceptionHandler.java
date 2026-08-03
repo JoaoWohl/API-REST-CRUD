@@ -2,7 +2,12 @@ package com.produto.api.exception;
 
 import com.produto.api.exception.auth.EmailOrPasswordWrongException;
 import com.produto.api.exception.auth.UserExistException;
+import com.produto.api.exception.auth.deletion.ExpiredTokenException;
+import com.produto.api.exception.auth.deletion.NonexistentTokenException;
+import com.produto.api.exception.auth.deletion.UsedTokenException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,6 +20,30 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LogManager.getLogger(GlobalExceptionHandler.class);
+
+    @ExceptionHandler({
+            ExpiredTokenException.class,
+            NonexistentTokenException.class,
+            UsedTokenException.class
+    })
+    public ResponseEntity<ErrorResponse> handleDeleteUserTokenException(RuntimeException ex, HttpServletRequest request) {
+
+        log.warn("Falha no processamento de token para uri [{}]: {}", request.getRequestURI(), ex.getMessage());
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(status.value())
+                .timestamp(OffsetDateTime.now())
+                .type(request.getRequestURI())
+                .title("Invalid Token")
+                .detail("O token fornecido é inválido, expirou ou já foi utilizado. Por favor, solicite uma nova confirmação.")
+                .build();
+
+        return ResponseEntity.status(status).body(error);
+    }
 
     @ExceptionHandler(NotEnoghProductException.class)
     public ResponseEntity<ErrorResponse>  notEnoghProductHandler(NotEnoghProductException ex, HttpServletRequest request){

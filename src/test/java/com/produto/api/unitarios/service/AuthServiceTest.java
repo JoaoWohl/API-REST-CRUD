@@ -1,6 +1,12 @@
 package com.produto.api.unitarios.service;
 
+import com.produto.api.entity.DeleteUserToken;
 import com.produto.api.exception.auth.EmailOrPasswordWrongException;
+import com.produto.api.exception.auth.UserNotFoundException;
+import com.produto.api.exception.auth.deletion.ExpiredTokenException;
+import com.produto.api.exception.auth.deletion.NonexistentTokenException;
+import com.produto.api.exception.auth.deletion.UsedTokenException;
+import com.produto.api.repository.DeleteUserTokenRepository;
 import com.produto.api.service.AuthService;
 import com.produto.api.security.JwtTokenService;
 import com.produto.api.dto.request.user.LoginRequestDTO;
@@ -12,6 +18,7 @@ import com.produto.api.entity.user.UserRole;
 import com.produto.api.exception.auth.UserExistException;
 import com.produto.api.repository.UserRepository;
 
+import com.produto.api.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +34,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -46,6 +55,10 @@ class AuthServiceTest {
     JwtTokenService tokenConfig;
     @Mock
     PasswordEncoder encoder;
+    @Mock
+    DeleteUserTokenRepository deleteUserTokenRepository;
+    @Mock
+    EmailService emailService;
 
     @InjectMocks
     AuthService authService;
@@ -53,13 +66,17 @@ class AuthServiceTest {
     private User validUser;
     private LoginRequestDTO validLoginRequestDTO;
     private RegisterUserRequestDTO validRegisterUserRequestDTO;
+    private DeleteUserToken validDeleteUserToken;
     private final static UUID USER_ID = UUID.randomUUID();
+    private final static UUID DELETE_USER_ID = UUID.randomUUID();
+    private final static UUID DELETE_USER_TOKEN = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
         validUser = new User(USER_ID, "User Name", "testlogin@example.com", "TestPassword",UserRole.USER);
         validLoginRequestDTO = new LoginRequestDTO("testlogin@example.com", "TestPassword");
         validRegisterUserRequestDTO = new RegisterUserRequestDTO("User Name","testlogin@example.com","TestPassword", UserRole.USER);
+        validDeleteUserToken = new DeleteUserToken(DELETE_USER_ID, DELETE_USER_TOKEN, validUser, LocalDateTime.now(), LocalDateTime.now().plusHours(12), false);
     }
 
     @Test
@@ -196,6 +213,57 @@ class AuthServiceTest {
     void registerAdmin_ShouldReturnIllegalArgumentException_WhenInvalidRegisterRequestDTO (String name, String login, String password, UserRole role) {
         RegisterUserRequestDTO invalidRegisterUserRequestDTO = new RegisterUserRequestDTO(name, login, password, role);
         assertThrows(IllegalArgumentException.class, () -> authService.registerAdmin(invalidRegisterUserRequestDTO));
+    }
+
+
+    @Test
+    void requestDeleteUser_ShouldReturnSuccess_WhenEverythingOkay() {
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(validUser));
+        when(deleteUserTokenRepository.save(any(DeleteUserToken.class))).thenReturn(validDeleteUserToken);
+
+        authService.requestDeleteUser(USER_ID);
+
+        verify(userRepository, times(1)).findById(USER_ID);
+        verify(deleteUserTokenRepository, times(1)).save(any(DeleteUserToken.class));
+        verify(emailService, times(1)).sendDeleteUserEmail(validUser.getLogin(), validDeleteUserToken.getToken());
+    }
+
+    @Test
+    void requestDeleteUser_ShouldReturnUserNotFound_WhenUserNotFound() {
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> authService.requestDeleteUser(USER_ID));
+    }
+
+    @Test
+    void confirmDeleteUser_ShouldReturnSuccess_WhenEverythingOkay() {
+        when(deleteUserTokenRepository.findByToken(validDeleteUserToken.getToken())).thenReturn(Optional.of(validDeleteUserToken));
+
+        authService.confirmDeleteUser(validDeleteUserToken.getToken());
+
+        verify(deleteUserTokenRepository, times(1)).findByToken(validDeleteUserToken.getToken());
+        verify(userRepository, times(1)).deleteById(validDeleteUserToken.getUser().getId());
+        verify(deleteUserTokenRepository, times(1)).save(validDeleteUserToken);
+    }
+
+    @Test
+    void confirmDeleteUser_ShouldReturnNonExistTokenException_WhenTokenNotExists() {
+        when(deleteUserTokenRepository.findByToken(validDeleteUserToken.getToken())).thenReturn(Optional.empty());
+        assertThrows(NonexistentTokenException.class, () -> authService.confirmDeleteUser(validDeleteUserToken.getToken()));
+    }
+
+    @Test
+    void confirmDeleteUser_ShouldReturnUsedTokenException_WhenTokenIsUsed() {
+        DeleteUserToken invalidDeleteUserToken = new DeleteUserToken(UUID.randomUUID(), UUID.randomUUID(), validUser, LocalDateTime.now(), LocalDateTime.now().plusHours(12), true);
+        when(deleteUserTokenRepository.findByToken(invalidDeleteUserToken.getToken())).thenReturn(Optional.of(invalidDeleteUserToken));
+        assertThrows(UsedTokenException.class, () -> authService.confirmDeleteUser(invalidDeleteUserToken.getToken()));
+    }
+
+    @Test
+    void confirmDeleteUser_ShouldReturnExpiredTokenException_WhenTokenIsExpired() {
+        DeleteUserToken invalidDeleteUserToken = new DeleteUserToken(UUID.randomUUID(), UUID.randomUUID(), validUser,LocalDateTime.now(), LocalDateTime.now().minusHours(1), false);
+        when(deleteUserTokenRepository.findByToken(invalidDeleteUserToken.getToken())).thenReturn(Optional.of(invalidDeleteUserToken));
+        assertThrows(ExpiredTokenException.class, () -> authService.confirmDeleteUser(invalidDeleteUserToken.getToken()));
     }
 
 }

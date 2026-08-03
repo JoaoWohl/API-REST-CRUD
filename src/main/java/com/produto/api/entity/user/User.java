@@ -1,5 +1,6 @@
 package com.produto.api.entity.user;
 
+import com.produto.api.entity.DeleteUserToken;
 import com.produto.api.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
@@ -40,8 +41,11 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Product> products = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<DeleteUserToken> deleteUserTokens = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
